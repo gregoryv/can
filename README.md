@@ -1,7 +1,7 @@
 can - Go lang openai API implementation
 
-If you don't know which can I'm referring to, we'll that's because you
-are just a stuipid hairy monkey.
+If you don't know which can I'm referring to; read the book
+[Expeditionary Forces](https://www.goodreads.com/book/show/3361793-expeditionary-forces).
 
 [OpenAI API-Reference](https://platform.openai.com/docs/api-reference)
 
