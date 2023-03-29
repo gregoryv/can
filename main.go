@@ -1,11 +1,8 @@
+// Command can provides access to openai API's from the terminal.
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 
@@ -20,9 +17,6 @@ func main() {
 		).String(
 			os.ExpandEnv("$HOME/.openai.key"),
 		)
-		model     = "gpt-3.5-turbo"
-		role      = "user"
-		host      = "api.openai.com"
 		inputFile = cli.Option("-i, --input").String("")
 		update    = cli.Option("-u, --update", "write result to input file").Bool()
 	)
@@ -47,98 +41,22 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// decide if we should use edits or chat API
-
-	content := strings.Join(cli.Args(), " ")
-	if inputFile != "" {
-		v, err := os.ReadFile(inputFile)
-		if err != nil {
+	switch {
+	case inputFile != "":
+		c := NewEdits()
+		c.InputFile = inputFile
+		c.APIKey = string(key)
+		c.Update = update
+		c.Instruction = strings.Join(cli.Args(), " ")
+		if err := c.Run(); err != nil {
 			log.Fatal(err)
 		}
-		input := Input{
-			"model":       "text-davinci-edit-001",
-			"input":       string(v),
-			"instruction": content,
-		}
-		// as json
-		data, err := json.Marshal(input)
-		if err != nil {
+	default:
+		c := NewChat()
+		c.Content = strings.Join(cli.Args(), " ")
+		c.APIKey = string(key)
+		if err := c.Run(); err != nil {
 			log.Fatal(err)
 		}
-		// create api request
-		r, _ := http.NewRequest("POST", "/v1/edits", bytes.NewReader(data))
-		r.Header.Set("content-type", "application/json")
-		r.Header.Set("authorization", "Bearer "+string(key))
-		r.URL.Scheme = "https"
-		r.URL.Host = host
-
-		// send request
-		resp, err := http.DefaultClient.Do(r)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer resp.Body.Close()
-
-		// parse result
-		var result struct {
-			Choices []struct {
-				Text string
-			}
-		}
-		json.NewDecoder(resp.Body).Decode(&result)
-
-		if update {
-			os.WriteFile(inputFile, []byte(result.Choices[0].Text), 0644)
-		} else {
-			fmt.Println(result.Choices[0].Text)
-		}
-
-	} else {
-		// /v1/chat/completions
-
-		// create input
-		input := Input{
-			"model": model,
-			"messages": []Input{
-				{
-					"role":    role,
-					"content": content,
-				},
-			},
-		}
-		// as json
-		data, err := json.Marshal(input)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// create api request
-		r, _ := http.NewRequest("POST", "/v1/chat/completions", bytes.NewReader(data))
-		r.Header.Set("content-type", "application/json")
-		r.Header.Set("authorization", "Bearer "+string(key))
-		r.URL.Scheme = "https"
-		r.URL.Host = host
-
-		// send request
-		resp, err := http.DefaultClient.Do(r)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer resp.Body.Close()
-
-		// parse result
-		var result struct {
-			Choices []struct {
-				Message struct {
-					Content string
-				}
-			}
-		}
-		json.NewDecoder(resp.Body).Decode(&result)
-
-		// assuming there will always be at least one choice
-		fmt.Println(result.Choices[0].Message.Content)
 	}
 }
-
-type Input map[string]any
