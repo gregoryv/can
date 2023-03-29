@@ -20,9 +20,10 @@ func main() {
 		).String(
 			os.ExpandEnv("$HOME/.openai.key"),
 		)
-		model = "gpt-3.5-turbo"
-		role  = "user"
-		host  = "api.openai.com"
+		model     = "gpt-3.5-turbo"
+		role      = "user"
+		host      = "api.openai.com"
+		inputFile = cli.Option("-i, --input").String("")
 	)
 	u := cli.Usage()
 	u.Example("Ask a question",
@@ -48,12 +49,44 @@ func main() {
 	// decide if we should use edits or chat API
 
 	content := strings.Join(cli.Args(), " ")
+	if inputFile != "" {
+		v, err := os.ReadFile(inputFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		input := Input{
+			"model":       "text-davinci-edit-001",
+			"input":       string(v),
+			"instruction": content,
+		}
+		// as json
+		data, err := json.Marshal(input)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// create api request
+		r, _ := http.NewRequest("POST", "/v1/edits", bytes.NewReader(data))
+		r.Header.Set("content-type", "application/json")
+		r.Header.Set("authorization", "Bearer "+string(key))
+		r.URL.Scheme = "https"
+		r.URL.Host = host
 
-	if v, err := os.ReadFile(args[len(args)-1]); err == nil {
-		// /v1/edits
-		content = string(v)
-		// todo use edits API
-		log.Fatal("todo")
+		// send request
+		resp, err := http.DefaultClient.Do(r)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer resp.Body.Close()
+
+		// parse result
+		var result struct {
+			Choices []struct {
+				Text string
+			}
+		}
+		json.NewDecoder(resp.Body).Decode(&result)
+
+		fmt.Println(result.Choices[0].Text)
 
 	} else {
 		// /v1/chat/completions
