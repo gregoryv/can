@@ -7,4 +7,4 @@ If you don't know which can I'm referring to; read the book
 
 ## Quick start
 
-    $ go install github.com/gregoryv/can/cmd/can@latest
+    $ go install github.com/gregoryv/can@latest
