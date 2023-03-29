@@ -24,6 +24,7 @@ func main() {
 		role      = "user"
 		host      = "api.openai.com"
 		inputFile = cli.Option("-i, --input").String("")
+		update    = cli.Option("-u, --update", "write result to input file").Bool()
 	)
 	u := cli.Usage()
 	u.Example("Ask a question",
@@ -31,7 +32,7 @@ func main() {
 	)
 
 	u.Example("Provide context",
-		"$ correct spelling in ./myfile.txt",
+		"$ can correct spelling in -i ./README.md -u",
 	)
 	cli.Parse()
 
@@ -86,7 +87,11 @@ func main() {
 		}
 		json.NewDecoder(resp.Body).Decode(&result)
 
-		fmt.Println(result.Choices[0].Text)
+		if update {
+			os.WriteFile(inputFile, []byte(result.Choices[0].Text), 0644)
+		} else {
+			fmt.Println(result.Choices[0].Text)
+		}
 
 	} else {
 		// /v1/chat/completions
