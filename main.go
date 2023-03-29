@@ -17,8 +17,7 @@ func main() {
 		).String(
 			os.ExpandEnv("$HOME/.openai.key"),
 		)
-		inputFile = cli.Option("-i, --input").String("")
-		update    = cli.Option("-u, --update", "write result to input file").Bool()
+		inFile = cli.Option("-if, --in-file").String("")
 	)
 	u := cli.Usage()
 	u.Example("Ask a question",
@@ -26,7 +25,7 @@ func main() {
 	)
 
 	u.Example("Provide context",
-		"$ can correct spelling in -i ./README.md -u",
+		"$ can correct spelling -in ./README.md",
 	)
 	cli.Parse()
 
@@ -42,11 +41,11 @@ func main() {
 	}
 
 	switch {
-	case inputFile != "":
+	case inFile != "":
 		c := NewEdits()
-		c.InputFile = inputFile
+		c.InFile = inFile
 		c.APIKey = string(key)
-		c.Update = update
+		c.Update = true
 		c.Instruction = strings.Join(cli.Args(), " ")
 		if err := c.Run(); err != nil {
 			log.Fatal(err)
