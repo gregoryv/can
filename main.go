@@ -17,7 +17,7 @@ func main() {
 		).String(
 			os.ExpandEnv("$HOME/.openai.key"),
 		)
-		in = cli.Option("-in").String("")
+		src = cli.Option("-in", "path to file or block of text").String("")
 	)
 	u := cli.Usage()
 	u.Example("Ask a question",
@@ -25,7 +25,8 @@ func main() {
 	)
 
 	u.Example("Provide context",
-		"$ can correct spelling --in ./README.md",
+		"$ can correct spelling -in ./README.md",
+		"$ can correct spelling -in \"hallo warld\"",
 	)
 	cli.Parse()
 
@@ -43,9 +44,9 @@ func main() {
 	}
 
 	switch {
-	case in != "":
+	case src != "":
 		c := NewEdits()
-		c.In = in
+		c.Src = src
 		c.APIKey = string(key)
 		c.Update = true
 		c.Instruction = strings.Join(cli.Args(), " ")

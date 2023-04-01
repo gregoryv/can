@@ -23,7 +23,7 @@ type Edits struct {
 	API         string // e.g. https://api.openapi.com/v1/chat/completions
 	APIKey      string
 	Model       string
-	In          string
+	Src         string
 	Instruction string
 
 	Update bool
@@ -31,9 +31,9 @@ type Edits struct {
 }
 
 func (e *Edits) Run() error {
-	v := e.In
-	if isFile(e.In) {
-		data, err := os.ReadFile(e.In)
+	v := e.Src
+	if isFile(e.Src) {
+		data, err := os.ReadFile(e.Src)
 		if err != nil {
 			return err
 		}
@@ -69,7 +69,7 @@ func (e *Edits) Run() error {
 	}
 	json.NewDecoder(resp.Body).Decode(&result)
 
-	if filename := e.In; isFile(filename) && e.Update {
+	if filename := e.Src; isFile(filename) && e.Update {
 		if out, err := os.Create(filename); err != nil {
 			return err
 		} else {
