@@ -18,15 +18,14 @@ func NewEdits() *Edits {
 
 type Edits struct {
 	Model string
-	// if Src is a file should the output be written to the same file
-	UpdateSrc bool
-
+	Input string
 	Instruction string
+	
+	// update input file
+	UpdateSrc bool
 
 	// result destination
 	Out io.Writer
-
-	Input string
 
 	// path to file
 	src       string
