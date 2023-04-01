@@ -80,7 +80,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := cmd.handleResponse(body); err != nil {
+	if err := cmd.HandleResponse(body); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -92,7 +92,7 @@ var (
 
 type command interface {
 	MakeRequest() (*http.Request, error)
-	handleResponse(io.Reader) error
+	HandleResponse(io.Reader) error
 }
 
 func sendRequest(r *http.Request) (body *bytes.Buffer, err error) {

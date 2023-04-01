@@ -13,7 +13,7 @@ func TestChat(t *testing.T) {
 	}
 
 	empty := strings.NewReader("{}")
-	if err := c.handleResponse(empty); err == nil {
+	if err := c.HandleResponse(empty); err == nil {
 		t.Error("empty result should result in error")
 	}
 }

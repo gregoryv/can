@@ -55,7 +55,7 @@ func (c *Edits) MakeRequest() (*http.Request, error) {
 	return r, nil
 }
 
-func (c *Edits) handleResponse(body io.Reader) error {
+func (c *Edits) HandleResponse(body io.Reader) error {
 	// parse result
 	var result struct {
 		Choices []struct{ Text string }

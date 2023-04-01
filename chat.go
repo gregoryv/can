@@ -46,7 +46,7 @@ func (c *Chat) MakeRequest() (*http.Request, error) {
 	return r, nil
 }
 
-func (c *Chat) handleResponse(body io.Reader) error {
+func (c *Chat) HandleResponse(body io.Reader) error {
 	// parse result
 	var result struct {
 		Choices []struct{ Message struct{ Content string } }
