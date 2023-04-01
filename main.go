@@ -53,7 +53,7 @@ func main() {
 	key = bytes.TrimSpace(key)
 
 	// select action
-	var cmd command
+	var cmd Command
 	switch {
 	case src != "":
 		c := NewEdits()
@@ -90,7 +90,7 @@ var (
 	debug   = log.New(ioutil.Discard, "can debug ", log.LstdFlags)
 )
 
-type command interface {
+type Command interface {
 	MakeRequest() (*http.Request, error)
 	HandleResponse(io.Reader) error
 }
