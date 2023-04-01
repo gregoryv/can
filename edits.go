@@ -37,11 +37,54 @@ type Edits struct {
 }
 
 func (e *Edits) Run() error {
+	r, err := e.makeRequest()
+	if err != nil {
+		return err
+	}
+
+	// send request
+	debug.Println(r.Method, r.URL)
+	resp, err := http.DefaultClient.Do(r)
+	if err != nil {
+		return err
+	}
+	debug.Print(resp.Status)
+
+	body := readClose(resp.Body)
+	if resp.StatusCode >= 400 {
+		log.Print(body.String())
+		return fmt.Errorf(resp.Status)
+	}
+
+	// parse result
+	var result struct {
+		Choices []struct{ Text string }
+	}
+	if err := json.NewDecoder(body).Decode(&result); err != nil {
+		return err
+	}
+	if len(result.Choices) == 0 {
+		return fmt.Errorf("no choices")
+	}
+
+	// act on result
+	if isFile(e.Src) && e.UpdateSrc {
+		out, err := os.Create(e.Src)
+		if err != nil {
+			return err
+		}
+		e.Out = out
+	}
+	_, err = e.Out.Write([]byte(result.Choices[0].Text))
+	return err
+}
+
+func (e *Edits) makeRequest() (*http.Request, error) {
 	v := e.Src
 	if isFile(e.Src) {
 		data, err := os.ReadFile(e.Src)
 		if err != nil {
-			return err
+			return nil, fmt.Errorf("makeRequest %w", err)
 		}
 		v = string(data)
 	}
@@ -53,50 +96,13 @@ func (e *Edits) Run() error {
 	// as json
 	data, err := json.Marshal(input)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("makeRequest %w", err)
 	}
 	// create api request
 	r, _ := http.NewRequest("POST", e.API, bytes.NewReader(data))
 	r.Header.Set("content-type", "application/json")
 	r.Header.Set("authorization", "Bearer "+e.APIKey)
-
-	// send request
-	debug.Println(r.Method, r.URL, len(data), "bytes")	
-	resp, err := http.DefaultClient.Do(r)
-	if err != nil {
-		return err
-	}
-	debug.Print(resp.Status)
-	
-	body := readClose(resp.Body)
-	if resp.StatusCode >= 400 {
-		log.Print(body.String())
-		return fmt.Errorf(resp.Status)
-	}
-
-	// parse result
-	var result struct {
-		Choices []struct {
-			Text string
-		}
-	}
-	if err := json.NewDecoder(body).Decode(&result); err != nil {
-		return err
-	}
-
-	if isFile(e.Src) && e.UpdateSrc {
-		out, err := os.Create(e.Src)
-		if err != nil {
-			return err
-		}
-		e.Out = out
-	}
-
-	if len(result.Choices) == 0 {
-		return fmt.Errorf("no choices")
-	}
-	_, err = e.Out.Write([]byte(result.Choices[0].Text))
-	return err
+	return r, nil
 }
 
 func isFile(src string) bool {

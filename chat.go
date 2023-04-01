@@ -22,12 +22,42 @@ func NewChat() *Chat {
 type Chat struct {
 	API     string // e.g. https://api.openapi.com/v1/chat/completions
 	APIKey  string
+	
 	Model   string
 	Content string
+
+	// result destination
 	Out     io.Writer
 }
 
 func (c *Chat) Run() error {
+	r, err := c.makeRequest()
+	if err != nil {
+		return err
+	}
+
+	body, err := sendRequest(r)
+	if err != nil {
+		return err
+	}
+
+	// parse result
+	var result struct {
+		Choices []struct{ Message struct{ Content string } }
+	}
+	if err := json.NewDecoder(body).Decode(&result); err != nil {
+		return err
+	}
+	if len(result.Choices) == 0 {
+		return fmt.Errorf("no choices")
+	}
+
+	// act on result
+	_, err = c.Out.Write([]byte(result.Choices[0].Message.Content))
+	return err
+}
+
+func (c *Chat) makeRequest() (*http.Request, error) {
 	// create input
 	input := map[string]any{
 		"model": c.Model,
@@ -41,47 +71,31 @@ func (c *Chat) Run() error {
 	// as json
 	data, err := json.Marshal(input)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("makeRequest %w", err)
 	}
 
 	// create api request
 	r, _ := http.NewRequest("POST", c.API, bytes.NewReader(data))
 	r.Header.Set("content-type", "application/json")
 	r.Header.Set("authorization", "Bearer "+c.APIKey)
+	return r, nil
+}
 
+func sendRequest(r *http.Request) (body *bytes.Buffer, err error) {
 	// send request
-	debug.Println(r.Method, r.URL, len(data), "bytes")
+	debug.Println(r.Method, r.URL)
 	resp, err := http.DefaultClient.Do(r)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("sendRequest %w", err)
 	}
 	debug.Print(resp.Status)
-	
-	body := readClose(resp.Body)
+
+	body = readClose(resp.Body)
 	if resp.StatusCode >= 400 {
 		log.Print(body.String())
-		return fmt.Errorf(resp.Status)
+		return nil, fmt.Errorf(resp.Status)
 	}
-
-	// parse result
-	var result struct {
-		Choices []struct {
-			Message struct {
-				Content string
-			}
-		}
-	}
-
-	if err := json.NewDecoder(body).Decode(&result); err != nil {
-		return err
-	}
-
-	// assuming there will always be at least one choice
-	if len(result.Choices) == 0 {
-		return fmt.Errorf("no choices")
-	}
-	_, err = c.Out.Write([]byte(result.Choices[0].Message.Content))
-	return err
+	return
 }
 
 func readClose(in io.ReadCloser) *bytes.Buffer {
