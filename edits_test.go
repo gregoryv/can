@@ -7,12 +7,35 @@ import (
 	"testing"
 )
 
-func TestEdits(t *testing.T) {
+func TestEdits_MakeRequest(t *testing.T) {
 	c := NewEdits()
 
 	if _, err := c.MakeRequest(); err != nil {
 		t.Error(err)
 	}
+
+	// from file
+	dst := filepath.Join(os.TempDir(), "edits.txt")
+	defer func() {
+		os.Chmod(dst, 0600)
+		os.RemoveAll(dst)
+	}()
+	os.WriteFile(dst, []byte(""), 0644)
+	c.Src = dst
+	if _, err := c.MakeRequest(); err != nil {
+		t.Error(err)
+	}
+
+	// bad permission
+	os.Chmod(dst, 0100)
+	if _, err := c.MakeRequest(); err == nil {
+		t.Error("expect error on inadequate read permission")
+	}
+
+}
+
+func TestEdits_HandleResponse(t *testing.T) {
+	c := NewEdits()
 
 	if err := c.HandleResponse(strings.NewReader("{}")); err == nil {
 		t.Error("empty result should fail")
@@ -48,7 +71,6 @@ func TestEdits(t *testing.T) {
 	if err := c.HandleResponse(strings.NewReader(valid)); err == nil {
 		t.Fatal("expect error on inadequate write permission")
 	}
-
 }
 
 // from https://platform.openai.com/docs/api-reference/edits/create
