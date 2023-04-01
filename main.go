@@ -84,29 +84,7 @@ func main() {
 	}
 }
 
-var (
-	debugOn bool
-	debug   = log.New(ioutil.Discard, "can debug ", log.LstdFlags)
-)
-
 type Command interface {
 	MakeRequest() *http.Request
 	HandleResponse(io.Reader) error
-}
-
-func sendRequest(r *http.Request) (body *bytes.Buffer, err error) {
-	// send request
-	debug.Println(r.Method, r.URL)
-	resp, err := http.DefaultClient.Do(r)
-	if err != nil {
-		return nil, fmt.Errorf("sendRequest %w", err)
-	}
-	debug.Print(resp.Status)
-
-	body = readClose(resp.Body)
-	if resp.StatusCode >= 400 {
-		log.Print(body.String())
-		return nil, fmt.Errorf(resp.Status)
-	}
-	return
 }
