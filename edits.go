@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 )
@@ -19,8 +18,6 @@ func NewEdits() *Edits {
 
 type Edits struct {
 	Model string
-	// path to file or block of text
-	Src string
 	// if Src is a file should the output be written to the same file
 	UpdateSrc bool
 
@@ -28,17 +25,22 @@ type Edits struct {
 
 	// result destination
 	Out io.Writer
+
+	// path to file or block of text
+	src       string
+	srcIsFile bool
 }
 
 func (c *Edits) SetSrc(v string) error {
 	if isFile(v) {
-		data, err := os.ReadFile(c.Src)
+		c.srcIsFile = true
+		data, err := os.ReadFile(c.src)
 		if err != nil {
 			return fmt.Errorf("SetSrc %w", err)
 		}
-		c.Src = string(data)
+		c.src = string(data)
 	} else {
-		c.Src = v
+		c.src = v
 	}
 	return nil
 }
@@ -46,7 +48,7 @@ func (c *Edits) SetSrc(v string) error {
 func (c *Edits) MakeRequest() *http.Request {
 	input := map[string]any{
 		"model":       c.Model,
-		"input":       c.Src,
+		"input":       c.src,
 		"instruction": c.Instruction,
 	}
 	data := should(json.Marshal(input))
@@ -71,8 +73,8 @@ func (c *Edits) HandleResponse(body io.Reader) error {
 	}
 
 	// act on result
-	if isFile(c.Src) && c.UpdateSrc {
-		out, err := os.Create(c.Src)
+	if c.srcIsFile && c.UpdateSrc {
+		out, err := os.Create(c.src)
 		if err != nil {
 			return err
 		}
@@ -83,16 +85,4 @@ func (c *Edits) HandleResponse(body io.Reader) error {
 	}
 	_, err := c.Out.Write([]byte(result.Choices[0].Text))
 	return err
-}
-
-func isFile(src string) bool {
-	_, err := os.Stat(src)
-	return err == nil
-}
-
-func should(data []byte, err error) []byte {
-	if err != nil {
-		log.Fatal(err)
-	}
-	return data
 }

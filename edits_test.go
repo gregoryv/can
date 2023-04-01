@@ -27,7 +27,6 @@ func TestEdits_SetSrc(t *testing.T) {
 		os.RemoveAll(dst)
 	}()
 	os.WriteFile(dst, []byte(""), 0644)
-	c.Src = dst
 	if err := c.SetSrc(dst); err != nil {
 		t.Error(err)
 	}
@@ -37,7 +36,6 @@ func TestEdits_SetSrc(t *testing.T) {
 	if c.SetSrc(dst) == nil {
 		t.Error("expect error on inadequate read permission")
 	}
-
 }
 
 func TestEdits_HandleResponse(t *testing.T) {
@@ -63,7 +61,7 @@ func TestEdits_HandleResponse(t *testing.T) {
 		os.RemoveAll(dst)
 	}()
 	os.WriteFile(dst, []byte(""), 0644)
-	c.Src = dst
+	c.SetSrc(dst)
 	c.UpdateSrc = true
 	if err := c.HandleResponse(strings.NewReader(valid)); err != nil {
 		t.Fatal(err)
