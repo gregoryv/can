@@ -17,7 +17,7 @@ func main() {
 		).String(
 			os.ExpandEnv("$HOME/.openai.key"),
 		)
-		inFile = cli.Option("-in").String("")
+		in = cli.Option("-in").String("")
 	)
 	u := cli.Usage()
 	u.Example("Ask a question",
@@ -43,9 +43,9 @@ func main() {
 	}
 
 	switch {
-	case inFile != "":
+	case in != "":
 		c := NewEdits()
-		c.InFile = inFile
+		c.In = in
 		c.APIKey = string(key)
 		c.Update = true
 		c.Instruction = strings.Join(cli.Args(), " ")
