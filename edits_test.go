@@ -10,8 +10,8 @@ import (
 func TestEdits_MakeRequest(t *testing.T) {
 	c := NewEdits()
 
-	if _, err := c.MakeRequest(); err != nil {
-		t.Error(err)
+	if r := c.MakeRequest(); r == nil {
+		t.Error("nil request")
 	}
 }
 

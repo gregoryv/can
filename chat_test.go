@@ -8,8 +8,8 @@ import (
 func TestChat(t *testing.T) {
 	c := NewChat()
 
-	if _, err := c.MakeRequest(); err != nil {
-		t.Error(err)
+	if r := c.MakeRequest(); r == nil {
+		t.Error("nil request")
 	}
 
 	if err := c.HandleResponse(strings.NewReader("{}")); err == nil {

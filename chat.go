@@ -24,7 +24,7 @@ type Chat struct {
 	Out io.Writer
 }
 
-func (c *Chat) MakeRequest() (*http.Request, error) {
+func (c *Chat) MakeRequest() *http.Request {
 	input := map[string]any{
 		"model": c.Model,
 		"messages": []map[string]any{
@@ -34,16 +34,13 @@ func (c *Chat) MakeRequest() (*http.Request, error) {
 			},
 		},
 	}
-	data, err := json.Marshal(input)
-	if err != nil {
-		return nil, fmt.Errorf("MakeRequest %w", err)
-	}
+	data := should(json.Marshal(input))
 	body := bytes.NewReader(data)
 	r, _ := http.NewRequest(
 		"POST", "https://api.openai.com/v1/chat/completions", body,
 	)
 	r.Header.Set("content-type", "application/json")
-	return r, nil
+	return r
 }
 
 func (c *Chat) HandleResponse(body io.Reader) error {

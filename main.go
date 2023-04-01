@@ -71,10 +71,7 @@ func main() {
 	}
 
 	// execute action
-	r, err := cmd.MakeRequest()
-	if err != nil {
-		log.Fatal(err)
-	}
+	r := cmd.MakeRequest()
 	r.Header.Set("authorization", "Bearer "+string(key))
 
 	body, err := sendRequest(r)
@@ -93,7 +90,7 @@ var (
 )
 
 type Command interface {
-	MakeRequest() (*http.Request, error)
+	MakeRequest() *http.Request
 	HandleResponse(io.Reader) error
 }
 

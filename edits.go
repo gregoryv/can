@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 )
@@ -42,29 +43,19 @@ func (c *Edits) SetSrc(v string) error {
 	return nil
 }
 
-func (c *Edits) Method() string { return "POST" }
-func (c *Edits) URL() string    { return "https://api.openai.com/v1/edits" }
-
-func (c *Edits) Input() map[string]any {
-	return map[string]any{
+func (c *Edits) MakeRequest() *http.Request {
+	input := map[string]any{
 		"model":       c.Model,
 		"input":       c.Src,
 		"instruction": c.Instruction,
 	}
-}
-
-func (c *Edits) MakeRequest() (*http.Request, error) {
-	input := c.Input()
-	data, err := json.Marshal(input)
-	if err != nil {
-		return nil, fmt.Errorf("MakeRequest %w", err)
-	}
+	data := should(json.Marshal(input))
 	body := bytes.NewReader(data)
 	r, _ := http.NewRequest(
 		"POST", "https://api.openai.com/v1/edits", body,
 	)
 	r.Header.Set("content-type", "application/json")
-	return r, nil
+	return r
 }
 
 func (c *Edits) HandleResponse(body io.Reader) error {
@@ -97,4 +88,11 @@ func (c *Edits) HandleResponse(body io.Reader) error {
 func isFile(src string) bool {
 	_, err := os.Stat(src)
 	return err == nil
+}
+
+func should(data []byte, err error) []byte {
+	if err != nil {
+		log.Fatal(err)
+	}
+	return data
 }
