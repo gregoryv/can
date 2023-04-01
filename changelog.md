@@ -3,7 +3,7 @@
 This project adheres to semantic versioning and all major changes will
 be noted in this file
 
-## [unreleased] 
+## [0.2.0] 2023-04-01
 
 - add --api-key, $OPENAI_API_KEY option
 - add --system-content, $CAN_SYSTEM_CONTENT option
