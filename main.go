@@ -69,7 +69,7 @@ func main() {
 	}
 
 	// execute action
-	r, err := cmd.makeRequest()
+	r, err := cmd.MakeRequest()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -91,7 +91,7 @@ var (
 )
 
 type command interface {
-	makeRequest() (*http.Request, error)
+	MakeRequest() (*http.Request, error)
 	handleResponse(io.Reader) error
 }
 

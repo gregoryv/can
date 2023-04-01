@@ -29,7 +29,7 @@ type Edits struct {
 	Out io.Writer
 }
 
-func (c *Edits) makeRequest() (*http.Request, error) {
+func (c *Edits) MakeRequest() (*http.Request, error) {
 	v := c.Src
 	if isFile(c.Src) {
 		data, err := os.ReadFile(c.Src)

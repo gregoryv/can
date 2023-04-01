@@ -8,7 +8,7 @@ import (
 func TestEdits(t *testing.T) {
 	c := NewEdits()
 
-	if _, err := c.makeRequest(); err != nil {
+	if _, err := c.MakeRequest(); err != nil {
 		t.Error(err)
 	}
 

@@ -24,7 +24,7 @@ type Chat struct {
 	Out io.Writer
 }
 
-func (c *Chat) makeRequest() (*http.Request, error) {
+func (c *Chat) MakeRequest() (*http.Request, error) {
 	input := map[string]any{
 		"model": c.Model,
 		"messages": []map[string]any{
