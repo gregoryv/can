@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 )
@@ -49,11 +50,18 @@ func (c *Chat) Run() error {
 	r.Header.Set("authorization", "Bearer "+c.APIKey)
 
 	// send request
+	debug.Println(r.Method, r.URL, len(data), "bytes")
 	resp, err := http.DefaultClient.Do(r)
 	if err != nil {
+		debug.Print(resp.Status)
 		return err
 	}
-	defer resp.Body.Close()
+
+	body := readClose(resp.Body)
+	if resp.StatusCode >= 400 {
+		log.Print(body.String())
+		return fmt.Errorf(resp.Status)
+	}
 
 	// parse result
 	var result struct {
@@ -63,7 +71,8 @@ func (c *Chat) Run() error {
 			}
 		}
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+
+	if err := json.NewDecoder(body).Decode(&result); err != nil {
 		return err
 	}
 
@@ -73,4 +82,17 @@ func (c *Chat) Run() error {
 	}
 	_, err = c.Out.Write([]byte(result.Choices[0].Message.Content))
 	return err
+}
+
+func readClose(in io.ReadCloser) *bytes.Buffer {
+	var buf bytes.Buffer
+	io.Copy(&buf, in)
+	in.Close()
+
+	if debugOn {
+		var tidy bytes.Buffer
+		json.Indent(&tidy, buf.Bytes(), "", "  ")
+		debug.Print(tidy.String())
+	}
+	return &buf
 }

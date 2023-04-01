@@ -65,7 +65,12 @@ func (e *Edits) Run() error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer resp.Body.Close()
+
+	body := readClose(resp.Body)
+	if resp.StatusCode >= 400 {
+		log.Print(body.String())
+		return fmt.Errorf(resp.Status)
+	}
 
 	// parse result
 	var result struct {
@@ -73,7 +78,9 @@ func (e *Edits) Run() error {
 			Text string
 		}
 	}
-	json.NewDecoder(resp.Body).Decode(&result)
+	if err := json.NewDecoder(body).Decode(&result); err != nil {
+		return err
+	}
 
 	if isFile(e.Src) && e.UpdateSrc {
 		out, err := os.Create(e.Src)

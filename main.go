@@ -2,12 +2,15 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 
 	"github.com/gregoryv/cmdline"
 )
+
+var debugOn bool
 
 func main() {
 	var (
@@ -17,7 +20,8 @@ func main() {
 		).String(
 			os.ExpandEnv("$HOME/.openai.key"),
 		)
-		src = cli.Option("-in", "path to file or block of text").String("")
+		src     = cli.Option("-in", "path to file or block of text").String("")
+		debugOn = cli.Flag("--debug")
 	)
 	u := cli.Usage()
 	u.Example("Ask a question",
@@ -31,6 +35,9 @@ func main() {
 	cli.Parse()
 
 	log.SetFlags(0)
+	if debugOn {
+		debug.SetOutput(os.Stderr)
+	}
 
 	args := cli.Args()
 	if len(args) == 0 {
@@ -62,3 +69,5 @@ func main() {
 		}
 	}
 }
+
+var debug = log.New(ioutil.Discard, "can debug ", log.LstdFlags)
