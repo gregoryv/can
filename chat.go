@@ -62,18 +62,3 @@ func (c *Chat) HandleResponse(body io.Reader) error {
 	_, err := c.Out.Write([]byte(result.Choices[0].Message.Content))
 	return err
 }
-
-// ----------------------------------------
-
-func readClose(in io.ReadCloser) *bytes.Buffer {
-	var buf bytes.Buffer
-	io.Copy(&buf, in)
-	in.Close()
-
-	if debugOn {
-		var tidy bytes.Buffer
-		json.Indent(&tidy, buf.Bytes(), "", "  ")
-		debug.Print(tidy.String())
-	}
-	return &buf
-}

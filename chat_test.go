@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"io/ioutil"
 	"strings"
 	"testing"
 )
@@ -27,15 +25,4 @@ func TestChat(t *testing.T) {
 		t.Error("expect error on invalid json")
 	}
 
-}
-
-func Test_readClose(t *testing.T) {
-	debugOn = true // global
-	in := `{"name": "carl"}`
-	var buf bytes.Buffer
-	debug.SetOutput(&buf)
-	readClose(ioutil.NopCloser(strings.NewReader(in)))
-	if buf.Len() == 0 {
-		t.Fail()
-	}
 }

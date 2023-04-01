@@ -17,10 +17,10 @@ func NewEdits() *Edits {
 }
 
 type Edits struct {
-	Model string
-	Input string
+	Model       string
+	Input       string
 	Instruction string
-	
+
 	// update input file
 	UpdateSrc bool
 
