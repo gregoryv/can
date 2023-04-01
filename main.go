@@ -2,6 +2,7 @@
 package main
 
 import (
+	"bytes"
 	"io/ioutil"
 	"log"
 	"os"
@@ -49,7 +50,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	key = bytes.TrimSpace(key)
 	switch {
 	case src != "":
 		c := NewEdits()
