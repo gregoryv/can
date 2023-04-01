@@ -57,7 +57,7 @@ func main() {
 	switch {
 	case src != "":
 		c := NewEdits()
-		if err := c.SetSrc(src); err != nil {
+		if err := c.SetInput(src); err != nil {
 			log.Fatal(err)
 		}
 		c.UpdateSrc = true

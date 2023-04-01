@@ -15,10 +15,10 @@ func TestEdits_MakeRequest(t *testing.T) {
 	}
 }
 
-func TestEdits_SetSrc(t *testing.T) {
+func TestEdits_SetInput(t *testing.T) {
 	c := NewEdits()
 	// plain text
-	c.SetSrc("some text that is not a file")
+	c.SetInput("some text that is not a file")
 
 	// from file
 	dst := filepath.Join(os.TempDir(), "edits.txt")
@@ -27,13 +27,13 @@ func TestEdits_SetSrc(t *testing.T) {
 		os.RemoveAll(dst)
 	}()
 	os.WriteFile(dst, []byte(""), 0644)
-	if err := c.SetSrc(dst); err != nil {
+	if err := c.SetInput(dst); err != nil {
 		t.Error(err)
 	}
 
 	// bad permission
 	os.Chmod(dst, 0100)
-	if c.SetSrc(dst) == nil {
+	if c.SetInput(dst) == nil {
 		t.Error("expect error on inadequate read permission")
 	}
 }
@@ -61,7 +61,7 @@ func TestEdits_HandleResponse(t *testing.T) {
 		os.RemoveAll(dst)
 	}()
 	os.WriteFile(dst, []byte(""), 0644)
-	c.SetSrc(dst)
+	c.SetInput(dst)
 	c.UpdateSrc = true
 	if err := c.HandleResponse(strings.NewReader(valid)); err != nil {
 		t.Fatal(err)

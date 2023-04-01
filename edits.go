@@ -26,21 +26,26 @@ type Edits struct {
 	// result destination
 	Out io.Writer
 
-	// path to file or block of text
+	Input string
+
+	// path to file
 	src       string
 	srcIsFile bool
 }
 
-func (c *Edits) SetSrc(v string) error {
+// SetInput sets the input to v. If v is a file the content is of that
+// file is used.
+func (c *Edits) SetInput(v string) error {
 	if isFile(v) {
+		c.src = v
 		c.srcIsFile = true
-		data, err := os.ReadFile(c.src)
+		data, err := os.ReadFile(v)
 		if err != nil {
 			return fmt.Errorf("SetSrc %w", err)
 		}
-		c.src = string(data)
+		c.Input = string(data)
 	} else {
-		c.src = v
+		c.Input = v
 	}
 	return nil
 }
