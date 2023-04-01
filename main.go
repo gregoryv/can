@@ -53,23 +53,23 @@ func main() {
 	key = bytes.TrimSpace(key)
 
 	// select action
-	var act action
+	var cmd command
 	switch {
 	case src != "":
 		c := NewEdits()
 		c.Src = src
 		c.UpdateSrc = true
 		c.Instruction = strings.Join(cli.Args(), " ")
-		act = c
+		cmd = c
 
 	default:
 		c := NewChat()
 		c.Content = strings.Join(cli.Args(), " ")
-		act = c
+		cmd = c
 	}
 
 	// execute action
-	r, err := act.makeRequest()
+	r, err := cmd.makeRequest()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -80,7 +80,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := act.handleResponse(body); err != nil {
+	if err := cmd.handleResponse(body); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -90,7 +90,7 @@ var (
 	debug   = log.New(ioutil.Discard, "can debug ", log.LstdFlags)
 )
 
-type action interface {
+type command interface {
 	makeRequest() (*http.Request, error)
 	handleResponse(io.Reader) error
 }

@@ -29,19 +29,19 @@ type Edits struct {
 	Out io.Writer
 }
 
-func (e *Edits) makeRequest() (*http.Request, error) {
-	v := e.Src
-	if isFile(e.Src) {
-		data, err := os.ReadFile(e.Src)
+func (c *Edits) makeRequest() (*http.Request, error) {
+	v := c.Src
+	if isFile(c.Src) {
+		data, err := os.ReadFile(c.Src)
 		if err != nil {
 			return nil, fmt.Errorf("makeRequest %w", err)
 		}
 		v = string(data)
 	}
 	input := map[string]any{
-		"model":       e.Model,
+		"model":       c.Model,
 		"input":       string(v),
-		"instruction": e.Instruction,
+		"instruction": c.Instruction,
 	}
 	data, err := json.Marshal(input)
 	if err != nil {
@@ -55,7 +55,7 @@ func (e *Edits) makeRequest() (*http.Request, error) {
 	return r, nil
 }
 
-func (e *Edits) handleResponse(body io.Reader) error {
+func (c *Edits) handleResponse(body io.Reader) error {
 	// parse result
 	var result struct {
 		Choices []struct{ Text string }
@@ -68,17 +68,17 @@ func (e *Edits) handleResponse(body io.Reader) error {
 	}
 
 	// act on result
-	if isFile(e.Src) && e.UpdateSrc {
-		out, err := os.Create(e.Src)
+	if isFile(c.Src) && c.UpdateSrc {
+		out, err := os.Create(c.Src)
 		if err != nil {
 			return err
 		}
-		e.Out = out
+		c.Out = out
 	}
-	if e.Out == nil {
-		e.Out = os.Stdout
+	if c.Out == nil {
+		c.Out = os.Stdout
 	}
-	_, err := e.Out.Write([]byte(result.Choices[0].Text))
+	_, err := c.Out.Write([]byte(result.Choices[0].Text))
 	return err
 }
 
