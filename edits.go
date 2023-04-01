@@ -13,7 +13,6 @@ func NewEdits() *Edits {
 	return &Edits{
 		Model:       "text-davinci-edit-001",
 		Instruction: "echo",
-		Out:         os.Stdout,
 	}
 }
 
@@ -75,6 +74,9 @@ func (e *Edits) handleResponse(body io.Reader) error {
 			return err
 		}
 		e.Out = out
+	}
+	if e.Out == nil {
+		e.Out = os.Stdout
 	}
 	_, err := e.Out.Write([]byte(result.Choices[0].Text))
 	return err

@@ -13,7 +13,6 @@ func NewChat() *Chat {
 	return &Chat{
 		Model:   "gpt-3.5-turbo",
 		Content: "say hello world!",
-		Out:     os.Stdout,
 	}
 }
 
@@ -57,6 +56,9 @@ func (c *Chat) handleResponse(body io.Reader) error {
 	}
 	if len(result.Choices) == 0 {
 		return fmt.Errorf("no choices")
+	}
+	if c.Out == nil {
+		c.Out = os.Stdout
 	}
 
 	// act on result
