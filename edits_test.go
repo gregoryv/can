@@ -29,6 +29,10 @@ func TestEdits(t *testing.T) {
 
 	// check result is written to file
 	dst := filepath.Join(os.TempDir(), "edits.txt")
+	defer func() {
+		os.Chmod(dst, 0600)
+		os.RemoveAll(dst)
+	}()
 	os.WriteFile(dst, []byte(""), 0644)
 	c.Src = dst
 	c.UpdateSrc = true
@@ -39,6 +43,12 @@ func TestEdits(t *testing.T) {
 	if v := string(got); v != "word" {
 		t.Errorf("got %q", v)
 	}
+
+	os.Chmod(dst, 0500)
+	if err := c.HandleResponse(strings.NewReader(valid)); err == nil {
+		t.Fatal("expect error on inadequate write permission")
+	}
+
 }
 
 // from https://platform.openai.com/docs/api-reference/edits/create
