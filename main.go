@@ -25,9 +25,11 @@ func main() {
 	)
 
 	u.Example("Provide context",
-		"$ can correct spelling -in ./README.md",
+		"$ can correct spelling --in-file ./README.md",
 	)
 	cli.Parse()
+
+	log.SetFlags(0)
 
 	args := cli.Args()
 	if len(args) == 0 {
