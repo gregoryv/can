@@ -48,7 +48,7 @@ func main() {
 		c := NewEdits()
 		c.Src = src
 		c.APIKey = string(key)
-		c.Update = true
+		c.UpdateSrc = true
 		c.Instruction = strings.Join(cli.Args(), " ")
 		if err := c.Run(); err != nil {
 			log.Fatal(err)

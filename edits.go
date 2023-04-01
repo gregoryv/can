@@ -20,14 +20,20 @@ func NewEdits() *Edits {
 }
 
 type Edits struct {
-	API         string // e.g. https://api.openapi.com/v1/chat/completions
-	APIKey      string
-	Model       string
-	Src         string
+	// e.g. https://api.openapi.com/v1/chat/completions
+	API    string
+	APIKey string
+
+	Model string
+	// path to file or block of text
+	Src string
+	// if Src is a file should the output be written to the same file
+	UpdateSrc bool
+
 	Instruction string
 
-	Update bool
-	Out    io.Writer
+	// result destination
+	Out io.Writer
 }
 
 func (e *Edits) Run() error {
@@ -69,12 +75,12 @@ func (e *Edits) Run() error {
 	}
 	json.NewDecoder(resp.Body).Decode(&result)
 
-	if filename := e.Src; isFile(filename) && e.Update {
-		if out, err := os.Create(filename); err != nil {
+	if isFile(e.Src) && e.UpdateSrc {
+		out, err := os.Create(e.Src)
+		if err != nil {
 			return err
-		} else {
-			e.Out = out
 		}
+		e.Out = out
 	}
 
 	if len(result.Choices) == 0 {
