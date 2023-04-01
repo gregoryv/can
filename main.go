@@ -14,6 +14,7 @@ import (
 
 func main() {
 	cli := cmdline.NewBasicParser()
+	sysContent := cli.Option("--system-content, $CAN_SYSTEM_CONTENT").String("")
 	src := cli.Option("-in", "path to file or block of text").String("")
 	keyfile := cli.Option(
 		"--api-key-file, $OPENAI_API_KEY_FILE",
@@ -29,6 +30,7 @@ func main() {
 	u.Example("Provide context",
 		"$ can correct spelling -in ./README.md",
 		"$ can correct spelling -in \"hallo warld\"",
+		`$ CAN_SYSTEM_CONTENT="You are a helpful assistant" can Who won the world series in 2020?`,
 	)
 	cli.Parse()
 
@@ -64,6 +66,7 @@ func main() {
 	default:
 		c := NewChat()
 		c.Content = strings.Join(cli.Args(), " ")
+		c.SystemContent = sysContent
 		cmd = c
 	}
 

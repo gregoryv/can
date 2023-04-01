@@ -17,22 +17,30 @@ func NewChat() *Chat {
 }
 
 type Chat struct {
-	Model   string
-	Content string
+	Model         string
+	Content       string
+	SystemContent string
 
 	// result destination
 	Out io.Writer
 }
 
 func (c *Chat) MakeRequest() *http.Request {
-	input := map[string]any{
-		"model": c.Model,
-		"messages": []map[string]any{
-			{
-				"role":    "user",
-				"content": c.Content,
-			},
+	messages := []map[string]any{
+		{
+			"role":    "user",
+			"content": c.Content,
 		},
+	}
+	if v := c.SystemContent; v != "" {
+		messages = append(messages, map[string]any{
+			"role":    "system",
+			"content": v,
+		})
+	}
+	input := map[string]any{
+		"model":    c.Model,
+		"messages": messages,
 	}
 	data := should(json.Marshal(input))
 	body := bytes.NewReader(data)
