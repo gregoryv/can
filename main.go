@@ -3,27 +3,27 @@ package main
 
 import (
 	"bytes"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
 	"github.com/gregoryv/cmdline"
 )
 
-var debugOn bool
-
 func main() {
-	var (
-		cli     = cmdline.NewBasicParser()
-		keyfile = cli.Option(
-			"-a, --api-key-file, $OPENAI_API_KEY_FILE",
-		).String(
-			os.ExpandEnv("$HOME/.openai.key"),
-		)
-		src     = cli.Option("-in", "path to file or block of text").String("")
-		debugOn = cli.Flag("--debug")
+	cli := cmdline.NewBasicParser()
+	src := cli.Option("-in", "path to file or block of text").String("")
+	keyfile := cli.Option(
+		"--api-key-file, $OPENAI_API_KEY_FILE",
+	).String(
+		os.ExpandEnv("$HOME/.openai.key"),
 	)
+	debugOn = cli.Flag("--debug")
+
 	u := cli.Usage()
 	u.Example("Ask a question",
 		"$ can why is the number 42 significant?",
@@ -51,24 +51,63 @@ func main() {
 		log.Fatal(err)
 	}
 	key = bytes.TrimSpace(key)
+
+	// select action
+	var act action
 	switch {
 	case src != "":
 		c := NewEdits()
 		c.Src = src
-		c.APIKey = string(key)
 		c.UpdateSrc = true
 		c.Instruction = strings.Join(cli.Args(), " ")
-		if err := c.Run(); err != nil {
-			log.Fatal(err)
-		}
+		act = c
+
 	default:
 		c := NewChat()
 		c.Content = strings.Join(cli.Args(), " ")
-		c.APIKey = string(key)
-		if err := c.Run(); err != nil {
-			log.Fatal(err)
-		}
+		act = c
+	}
+
+	// execute action
+	r, err := act.makeRequest()
+	if err != nil {
+		log.Fatal(err)
+	}
+	r.Header.Set("authorization", "Bearer "+string(key))
+
+	body, err := sendRequest(r)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := act.handleResponse(body); err != nil {
+		log.Fatal(err)
 	}
 }
 
-var debug = log.New(ioutil.Discard, "can debug ", log.LstdFlags)
+var (
+	debugOn bool
+	debug   = log.New(ioutil.Discard, "can debug ", log.LstdFlags)
+)
+
+type action interface {
+	makeRequest() (*http.Request, error)
+	handleResponse(io.Reader) error
+}
+
+func sendRequest(r *http.Request) (body *bytes.Buffer, err error) {
+	// send request
+	debug.Println(r.Method, r.URL)
+	resp, err := http.DefaultClient.Do(r)
+	if err != nil {
+		return nil, fmt.Errorf("sendRequest %w", err)
+	}
+	debug.Print(resp.Status)
+
+	body = readClose(resp.Body)
+	if resp.StatusCode >= 400 {
+		log.Print(body.String())
+		return nil, fmt.Errorf(resp.Status)
+	}
+	return
+}

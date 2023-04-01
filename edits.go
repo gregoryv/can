@@ -11,7 +11,6 @@ import (
 
 func NewEdits() *Edits {
 	return &Edits{
-		API:         "https://api.openai.com/v1/edits",
 		Model:       "text-davinci-edit-001",
 		Instruction: "echo",
 		Out:         os.Stdout,
@@ -19,9 +18,6 @@ func NewEdits() *Edits {
 }
 
 type Edits struct {
-	API    string
-	APIKey string
-
 	Model string
 	// path to file or block of text
 	Src string
@@ -32,20 +28,6 @@ type Edits struct {
 
 	// result destination
 	Out io.Writer
-}
-
-func (e *Edits) Run() error {
-	r, err := e.makeRequest()
-	if err != nil {
-		return err
-	}
-
-	body, err := sendRequest(r)
-	if err != nil {
-		return err
-	}
-
-	return e.handleResponse(body)
 }
 
 func (e *Edits) makeRequest() (*http.Request, error) {
@@ -62,15 +44,15 @@ func (e *Edits) makeRequest() (*http.Request, error) {
 		"input":       string(v),
 		"instruction": e.Instruction,
 	}
-	// as json
 	data, err := json.Marshal(input)
 	if err != nil {
 		return nil, fmt.Errorf("makeRequest %w", err)
 	}
-	// create api request
-	r, _ := http.NewRequest("POST", e.API, bytes.NewReader(data))
+	body := bytes.NewReader(data)
+	r, _ := http.NewRequest(
+		"POST", "https://api.openai.com/v1/edits", body,
+	)
 	r.Header.Set("content-type", "application/json")
-	r.Header.Set("authorization", "Bearer "+e.APIKey)
 	return r, nil
 }
 

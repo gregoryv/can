@@ -5,14 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 )
 
 func NewChat() *Chat {
 	return &Chat{
-		API:     "https://api.openai.com/v1/chat/completions",
 		Model:   "gpt-3.5-turbo",
 		Content: "say hello world!",
 		Out:     os.Stdout,
@@ -20,9 +18,6 @@ func NewChat() *Chat {
 }
 
 type Chat struct {
-	API    string
-	APIKey string
-
 	Model   string
 	Content string
 
@@ -30,22 +25,7 @@ type Chat struct {
 	Out io.Writer
 }
 
-func (c *Chat) Run() error {
-	r, err := c.makeRequest()
-	if err != nil {
-		return err
-	}
-
-	body, err := sendRequest(r)
-	if err != nil {
-		return err
-	}
-
-	return c.handleResponse(body)
-}
-
 func (c *Chat) makeRequest() (*http.Request, error) {
-	// create input
 	input := map[string]any{
 		"model": c.Model,
 		"messages": []map[string]any{
@@ -55,16 +35,15 @@ func (c *Chat) makeRequest() (*http.Request, error) {
 			},
 		},
 	}
-	// as json
 	data, err := json.Marshal(input)
 	if err != nil {
 		return nil, fmt.Errorf("makeRequest %w", err)
 	}
-
-	// create api request
-	r, _ := http.NewRequest("POST", c.API, bytes.NewReader(data))
+	body := bytes.NewReader(data)
+	r, _ := http.NewRequest(
+		"POST", "https://api.openai.com/v1/chat/completions", body,
+	)
 	r.Header.Set("content-type", "application/json")
-	r.Header.Set("authorization", "Bearer "+c.APIKey)
 	return r, nil
 }
 
@@ -86,23 +65,6 @@ func (c *Chat) handleResponse(body io.Reader) error {
 }
 
 // ----------------------------------------
-
-func sendRequest(r *http.Request) (body *bytes.Buffer, err error) {
-	// send request
-	debug.Println(r.Method, r.URL)
-	resp, err := http.DefaultClient.Do(r)
-	if err != nil {
-		return nil, fmt.Errorf("sendRequest %w", err)
-	}
-	debug.Print(resp.Status)
-
-	body = readClose(resp.Body)
-	if resp.StatusCode >= 400 {
-		log.Print(body.String())
-		return nil, fmt.Errorf(resp.Status)
-	}
-	return
-}
 
 func readClose(in io.ReadCloser) *bytes.Buffer {
 	var buf bytes.Buffer
