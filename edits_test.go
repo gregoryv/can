@@ -17,6 +17,8 @@ func TestEdits_MakeRequest(t *testing.T) {
 
 func TestEdits_SetSrc(t *testing.T) {
 	c := NewEdits()
+	// plain text
+	c.SetSrc("some text that is not a file")
 
 	// from file
 	dst := filepath.Join(os.TempDir(), "edits.txt")
