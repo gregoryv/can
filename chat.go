@@ -20,14 +20,14 @@ func NewChat() *Chat {
 }
 
 type Chat struct {
-	API     string // e.g. https://api.openapi.com/v1/chat/completions
-	APIKey  string
-	
+	API    string // e.g. https://api.openapi.com/v1/chat/completions
+	APIKey string
+
 	Model   string
 	Content string
 
 	// result destination
-	Out     io.Writer
+	Out io.Writer
 }
 
 func (c *Chat) Run() error {
