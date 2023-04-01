@@ -21,6 +21,7 @@ func main() {
 	).String(
 		os.ExpandEnv("$HOME/.openai.key"),
 	)
+	keyEnv := cli.Option("--api-key, $OPENAI_API_KEY").String("")
 	debugOn = cli.Flag("--debug")
 
 	u := cli.Usage()
@@ -45,11 +46,16 @@ func main() {
 	}
 
 	// load api key
-	key, err := os.ReadFile(keyfile)
-	if err != nil {
-		log.Fatal(err)
+	var key []byte
+	if len(keyEnv) > 0 {
+		key = []byte(keyEnv)
+	} else {
+		data, err := os.ReadFile(keyfile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		key = bytes.TrimSpace(data)
 	}
-	key = bytes.TrimSpace(key)
 
 	// select action
 	var cmd Command
