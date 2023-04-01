@@ -7,13 +7,22 @@ import (
 
 func TestChat(t *testing.T) {
 	c := NewChat()
-	_, err := c.MakeRequest()
-	if err != nil {
+
+	if _, err := c.MakeRequest(); err != nil {
 		t.Error(err)
 	}
 
-	empty := strings.NewReader("{}")
-	if err := c.HandleResponse(empty); err == nil {
-		t.Error("empty result should result in error")
+	if err := c.HandleResponse(strings.NewReader("{}")); err == nil {
+		t.Error("empty result should fail")
 	}
+
+	if err := c.HandleResponse(strings.NewReader(valid)); err != nil {
+		t.Error(err)
+	}
+
+	// invalid json
+	if err := c.HandleResponse(strings.NewReader("{")); err == nil {
+		t.Error("expect error on invalid json")
+	}
+
 }

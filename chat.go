@@ -36,7 +36,7 @@ func (c *Chat) MakeRequest() (*http.Request, error) {
 	}
 	data, err := json.Marshal(input)
 	if err != nil {
-		return nil, fmt.Errorf("makeRequest %w", err)
+		return nil, fmt.Errorf("MakeRequest %w", err)
 	}
 	body := bytes.NewReader(data)
 	r, _ := http.NewRequest(

@@ -34,7 +34,7 @@ func (c *Edits) MakeRequest() (*http.Request, error) {
 	if isFile(c.Src) {
 		data, err := os.ReadFile(c.Src)
 		if err != nil {
-			return nil, fmt.Errorf("makeRequest %w", err)
+			return nil, fmt.Errorf("MakeRequest %w", err)
 		}
 		v = string(data)
 	}
@@ -45,7 +45,7 @@ func (c *Edits) MakeRequest() (*http.Request, error) {
 	}
 	data, err := json.Marshal(input)
 	if err != nil {
-		return nil, fmt.Errorf("makeRequest %w", err)
+		return nil, fmt.Errorf("MakeRequest %w", err)
 	}
 	body := bytes.NewReader(data)
 	r, _ := http.NewRequest(
