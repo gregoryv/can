@@ -17,7 +17,7 @@ func main() {
 		).String(
 			os.ExpandEnv("$HOME/.openai.key"),
 		)
-		inFile = cli.Option("-if, --in-file").String("")
+		inFile = cli.Option("-in").String("")
 	)
 	u := cli.Usage()
 	u.Example("Ask a question",
@@ -25,7 +25,7 @@ func main() {
 	)
 
 	u.Example("Provide context",
-		"$ can correct spelling --in-file ./README.md",
+		"$ can correct spelling --in ./README.md",
 	)
 	cli.Parse()
 

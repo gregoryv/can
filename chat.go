@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -67,6 +68,9 @@ func (c *Chat) Run() error {
 	}
 
 	// assuming there will always be at least one choice
+	if len(result.Choices) == 0 {
+		return fmt.Errorf("no choices")
+	}
 	_, err = c.Out.Write([]byte(result.Choices[0].Message.Content))
 	return err
 }

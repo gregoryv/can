@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -72,6 +73,9 @@ func (e *Edits) Run() error {
 		}
 	}
 
+	if len(result.Choices) == 0 {
+		return fmt.Errorf("no choices")
+	}
 	_, err = e.Out.Write([]byte(result.Choices[0].Text))
 	return err
 }
