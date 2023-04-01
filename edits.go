@@ -53,7 +53,7 @@ func (c *Edits) SetInput(v string) error {
 func (c *Edits) MakeRequest() *http.Request {
 	input := map[string]any{
 		"model":       c.Model,
-		"input":       c.src,
+		"input":       c.Input,
 		"instruction": c.Instruction,
 	}
 	data := should(json.Marshal(input))
