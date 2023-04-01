@@ -61,11 +61,13 @@ func (e *Edits) Run() error {
 	r.Header.Set("authorization", "Bearer "+e.APIKey)
 
 	// send request
+	debug.Println(r.Method, r.URL, len(data), "bytes")	
 	resp, err := http.DefaultClient.Do(r)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-
+	debug.Print(resp.Status)
+	
 	body := readClose(resp.Body)
 	if resp.StatusCode >= 400 {
 		log.Print(body.String())

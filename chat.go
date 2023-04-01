@@ -56,6 +56,7 @@ func (c *Chat) Run() error {
 		return err
 	}
 	debug.Print(resp.Status)
+	
 	body := readClose(resp.Body)
 	if resp.StatusCode >= 400 {
 		log.Print(body.String())
