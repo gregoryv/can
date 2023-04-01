@@ -29,20 +29,32 @@ type Edits struct {
 	Out io.Writer
 }
 
-func (c *Edits) MakeRequest() (*http.Request, error) {
-	v := c.Src
-	if isFile(c.Src) {
+func (c *Edits) SetSrc(v string) error {
+	if isFile(v) {
 		data, err := os.ReadFile(c.Src)
 		if err != nil {
-			return nil, fmt.Errorf("MakeRequest %w", err)
+			return fmt.Errorf("SetSrc %w", err)
 		}
-		v = string(data)
+		c.Src = string(data)
+	} else {
+		c.Src = v
 	}
-	input := map[string]any{
+	return nil
+}
+
+func (c *Edits) Method() string { return "POST" }
+func (c *Edits) URL() string    { return "https://api.openai.com/v1/edits" }
+
+func (c *Edits) Input() map[string]any {
+	return map[string]any{
 		"model":       c.Model,
-		"input":       string(v),
+		"input":       c.Src,
 		"instruction": c.Instruction,
 	}
+}
+
+func (c *Edits) MakeRequest() (*http.Request, error) {
+	input := c.Input()
 	data, err := json.Marshal(input)
 	if err != nil {
 		return nil, fmt.Errorf("MakeRequest %w", err)

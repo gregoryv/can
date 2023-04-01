@@ -13,6 +13,10 @@ func TestEdits_MakeRequest(t *testing.T) {
 	if _, err := c.MakeRequest(); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestEdits_SetSrc(t *testing.T) {
+	c := NewEdits()
 
 	// from file
 	dst := filepath.Join(os.TempDir(), "edits.txt")
@@ -22,13 +26,13 @@ func TestEdits_MakeRequest(t *testing.T) {
 	}()
 	os.WriteFile(dst, []byte(""), 0644)
 	c.Src = dst
-	if _, err := c.MakeRequest(); err != nil {
+	if err := c.SetSrc(dst); err != nil {
 		t.Error(err)
 	}
 
 	// bad permission
 	os.Chmod(dst, 0100)
-	if _, err := c.MakeRequest(); err == nil {
+	if c.SetSrc(dst) == nil {
 		t.Error("expect error on inadequate read permission")
 	}
 

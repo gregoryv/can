@@ -57,7 +57,9 @@ func main() {
 	switch {
 	case src != "":
 		c := NewEdits()
-		c.Src = src
+		if err := c.SetSrc(src); err != nil {
+			log.Fatal(err)
+		}
 		c.UpdateSrc = true
 		c.Instruction = strings.Join(cli.Args(), " ")
 		cmd = c
