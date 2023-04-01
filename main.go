@@ -3,9 +3,7 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -28,7 +26,6 @@ func main() {
 	u.Example("Ask a question",
 		"$ can why is the number 42 significant?",
 	)
-
 	u.Example("Provide context",
 		"$ can correct spelling -in ./README.md",
 		"$ can correct spelling -in \"hallo warld\"",
