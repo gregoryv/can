@@ -1,4 +1,4 @@
-can - Go lang openai API implementation
+can - command line interface to openai
 
 If you don't know which can I'm referring to; read the book
 [Expeditionary Forces](https://www.goodreads.com/book/show/3361793-expeditionary-forces).
