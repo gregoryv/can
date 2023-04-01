@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 )
@@ -20,7 +19,6 @@ func NewEdits() *Edits {
 }
 
 type Edits struct {
-	// e.g. https://api.openapi.com/v1/chat/completions
 	API    string
 	APIKey string
 
@@ -42,41 +40,12 @@ func (e *Edits) Run() error {
 		return err
 	}
 
-	// send request
-	debug.Println(r.Method, r.URL)
-	resp, err := http.DefaultClient.Do(r)
+	body, err := sendRequest(r)
 	if err != nil {
 		return err
 	}
-	debug.Print(resp.Status)
 
-	body := readClose(resp.Body)
-	if resp.StatusCode >= 400 {
-		log.Print(body.String())
-		return fmt.Errorf(resp.Status)
-	}
-
-	// parse result
-	var result struct {
-		Choices []struct{ Text string }
-	}
-	if err := json.NewDecoder(body).Decode(&result); err != nil {
-		return err
-	}
-	if len(result.Choices) == 0 {
-		return fmt.Errorf("no choices")
-	}
-
-	// act on result
-	if isFile(e.Src) && e.UpdateSrc {
-		out, err := os.Create(e.Src)
-		if err != nil {
-			return err
-		}
-		e.Out = out
-	}
-	_, err = e.Out.Write([]byte(result.Choices[0].Text))
-	return err
+	return e.handleResponse(body)
 }
 
 func (e *Edits) makeRequest() (*http.Request, error) {
@@ -103,6 +72,30 @@ func (e *Edits) makeRequest() (*http.Request, error) {
 	r.Header.Set("content-type", "application/json")
 	r.Header.Set("authorization", "Bearer "+e.APIKey)
 	return r, nil
+}
+
+func (e *Edits) handleResponse(body io.Reader) error {
+	// parse result
+	var result struct {
+		Choices []struct{ Text string }
+	}
+	if err := json.NewDecoder(body).Decode(&result); err != nil {
+		return err
+	}
+	if len(result.Choices) == 0 {
+		return fmt.Errorf("no choices")
+	}
+
+	// act on result
+	if isFile(e.Src) && e.UpdateSrc {
+		out, err := os.Create(e.Src)
+		if err != nil {
+			return err
+		}
+		e.Out = out
+	}
+	_, err := e.Out.Write([]byte(result.Choices[0].Text))
+	return err
 }
 
 func isFile(src string) bool {

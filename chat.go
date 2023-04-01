@@ -20,7 +20,7 @@ func NewChat() *Chat {
 }
 
 type Chat struct {
-	API    string // e.g. https://api.openapi.com/v1/chat/completions
+	API    string
 	APIKey string
 
 	Model   string
@@ -41,20 +41,7 @@ func (c *Chat) Run() error {
 		return err
 	}
 
-	// parse result
-	var result struct {
-		Choices []struct{ Message struct{ Content string } }
-	}
-	if err := json.NewDecoder(body).Decode(&result); err != nil {
-		return err
-	}
-	if len(result.Choices) == 0 {
-		return fmt.Errorf("no choices")
-	}
-
-	// act on result
-	_, err = c.Out.Write([]byte(result.Choices[0].Message.Content))
-	return err
+	return c.handleResponse(body)
 }
 
 func (c *Chat) makeRequest() (*http.Request, error) {
@@ -80,6 +67,25 @@ func (c *Chat) makeRequest() (*http.Request, error) {
 	r.Header.Set("authorization", "Bearer "+c.APIKey)
 	return r, nil
 }
+
+func (c *Chat) handleResponse(body io.Reader) error {
+	// parse result
+	var result struct {
+		Choices []struct{ Message struct{ Content string } }
+	}
+	if err := json.NewDecoder(body).Decode(&result); err != nil {
+		return err
+	}
+	if len(result.Choices) == 0 {
+		return fmt.Errorf("no choices")
+	}
+
+	// act on result
+	_, err := c.Out.Write([]byte(result.Choices[0].Message.Content))
+	return err
+}
+
+// ----------------------------------------
 
 func sendRequest(r *http.Request) (body *bytes.Buffer, err error) {
 	// send request
