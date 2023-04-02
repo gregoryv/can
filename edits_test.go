@@ -7,16 +7,16 @@ import (
 	"testing"
 )
 
-func TestEdits_MakeRequest(t *testing.T) {
-	c := NewEdits()
+func Test_edits_MakeRequest(t *testing.T) {
+	c := newEdits()
 
 	if r := c.MakeRequest(); r == nil {
 		t.Error("nil request")
 	}
 }
 
-func TestEdits_SetInput(t *testing.T) {
-	c := NewEdits()
+func Test_edits_SetInput(t *testing.T) {
+	c := newEdits()
 	// plain text
 	c.SetInput("some text that is not a file")
 
@@ -38,8 +38,8 @@ func TestEdits_SetInput(t *testing.T) {
 	}
 }
 
-func TestEdits_HandleResponse(t *testing.T) {
-	c := NewEdits()
+func Test_edits_HandleResponse(t *testing.T) {
+	c := newEdits()
 
 	if err := c.HandleResponse(strings.NewReader("{}")); err == nil {
 		t.Error("empty result should fail")

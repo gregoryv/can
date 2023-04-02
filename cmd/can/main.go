@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gregoryv/can"
 	"github.com/gregoryv/cmdline"
-	"github.com/gregoryv/can"	
 )
 
 func main() {

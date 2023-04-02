@@ -10,14 +10,14 @@ import (
 	"os"
 )
 
-func NewEdits() *Edits {
-	return &Edits{
+func newEdits() *edits {
+	return &edits{
 		Model:       "text-davinci-edit-001",
 		Instruction: "echo",
 	}
 }
 
-type Edits struct {
+type edits struct {
 	Model       string
 	Input       string
 	Instruction string
@@ -35,7 +35,7 @@ type Edits struct {
 
 // SetInput sets the input to v. If v is a file the content is of that
 // file is used.
-func (c *Edits) SetInput(v string) error {
+func (c *edits) SetInput(v string) error {
 	if isFile(v) {
 		c.src = v
 		c.srcIsFile = true
@@ -50,7 +50,7 @@ func (c *Edits) SetInput(v string) error {
 	return nil
 }
 
-func (c *Edits) MakeRequest() *http.Request {
+func (c *edits) MakeRequest() *http.Request {
 	input := map[string]any{
 		"model":       c.Model,
 		"input":       c.Input,
@@ -63,7 +63,7 @@ func (c *Edits) MakeRequest() *http.Request {
 	return r
 }
 
-func (c *Edits) HandleResponse(body io.Reader) error {
+func (c *edits) HandleResponse(body io.Reader) error {
 	// parse result
 	var result struct {
 		Choices []struct{ Text string }

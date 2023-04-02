@@ -37,7 +37,7 @@ func (s *System) Run() error {
 	var cmd Command
 	switch {
 	case s.Src != "":
-		c := NewEdits()
+		c := newEdits()
 		if err := c.SetInput(s.Src); err != nil {
 			return err
 		}
