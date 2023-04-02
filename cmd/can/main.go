@@ -7,13 +7,14 @@ import (
 	"strings"
 
 	"github.com/gregoryv/cmdline"
+	"github.com/gregoryv/can"	
 )
 
 func main() {
 	cli := cmdline.NewBasicParser()
 
 	// Skippy the magnificent
-	var c System
+	var c can.System
 
 	c.SysContent = cli.Option("--system-content, $CAN_SYSTEM_CONTENT").String("")
 	c.Src = cli.Option("-in", "path to file or block of text").String("")
@@ -25,7 +26,7 @@ func main() {
 	c.API.Key = cli.Option("--api-key, $OPENAI_API_KEY").String("")
 	c.API.URL = cli.Option("--api-url, $OPENAI_API_URL").Url("https://api.openai.com")
 
-	SetDebug(cli.Flag("--debug"))
+	can.SetDebug(cli.Flag("--debug"))
 
 	u := cli.Usage()
 	u.Example("Ask a question",
