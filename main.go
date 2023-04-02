@@ -47,4 +47,5 @@ func main() {
 	}
 }
 
+// here so we can fully test func main
 var fatal func(...interface{}) = log.Fatal

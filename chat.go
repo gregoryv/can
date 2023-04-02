@@ -27,17 +27,13 @@ type Chat struct {
 }
 
 func (c *Chat) MakeRequest() *http.Request {
-	messages := []map[string]any{
-		{
-			"role":    "user",
-			"content": c.Content,
-		},
+	type m struct {
+		Role    string `json:"role"`
+		Content string `json:"content"`
 	}
+	messages := []m{m{"user", c.Content}}
 	if v := c.SystemContent; v != "" {
-		messages = append(messages, map[string]any{
-			"role":    "system",
-			"content": v,
-		})
+		messages = append(messages, m{"system", v})
 	}
 	input := map[string]any{
 		"model":    c.Model,

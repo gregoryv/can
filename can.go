@@ -26,11 +26,9 @@ func (C *Can) Run() error {
 	if len(C.Input) == 0 {
 		return fmt.Errorf("missing input")
 	}
-
 	if err := C.loadkey(); err != nil {
 		return err
 	}
-
 	if C.API.URL == nil {
 		return fmt.Errorf("Can.Run: missing API.URL")
 	}
