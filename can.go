@@ -73,7 +73,7 @@ func (C *Can) Run() error {
 }
 
 func (C *Can) loadkey() error {
-	if len(C.API.Key) > 0 {
+	if C.API.Key != "" {
 		return nil
 	}
 	if C.API.KeyFile == "" {
