@@ -5,11 +5,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 )
+
+// NewSystem returns a system with debug log is disabled.
+func NewSystem() *System {
+	return &System{
+		debug: log.New(ioutil.Discard, "can debug ", log.Flags()),
+	}
+}
 
 type System struct {
 	api struct {
@@ -24,6 +32,7 @@ type System struct {
 	input      string
 
 	debugOn bool
+	debug   *log.Logger
 }
 
 func (s *System) SetAPIUrl(v *url.URL)   { s.api.URL = v }
@@ -33,7 +42,17 @@ func (s *System) SetSysContent(v string) { s.sysContent = v }
 func (s *System) SetUpdateSrc(v bool)    { s.updateSrc = v }
 func (s *System) SetSrc(v string)        { s.src = v }
 func (s *System) SetInput(v string)      { s.input = v }
-func (s *System) SetDebugOn(v bool)      { s.debugOn = v }
+
+// SetDebugOutput writer, use nil to disable
+func (s *System) SetDebugOutput(v io.Writer) {
+	if v == nil {
+		s.debugOn = false
+		s.debug.SetOutput(ioutil.Discard)
+		return
+	}
+	s.debugOn = true
+	s.debug.SetOutput(v)
+}
 
 func (s *System) Run() error {
 	if len(s.input) == 0 {
@@ -99,27 +118,14 @@ type command interface {
 	HandleResponse(io.Reader) error
 }
 
-func (s *System) readClose(in io.ReadCloser) *bytes.Buffer {
-	var buf bytes.Buffer
-	io.Copy(&buf, in)
-	in.Close()
-
-	if debugOn {
-		var tidy bytes.Buffer
-		json.Indent(&tidy, buf.Bytes(), "", "  ")
-		debug.Print(tidy.String())
-	}
-	return &buf
-}
-
 func (s *System) sendRequest(r *http.Request) (body *bytes.Buffer, err error) {
 	// send request
-	debug.Println(r.Method, r.URL)
+	s.debug.Println(r.Method, r.URL)
 	resp, err := http.DefaultClient.Do(r)
 	if err != nil {
 		return nil, fmt.Errorf("sendRequest %w", err)
 	}
-	debug.Print(resp.Status)
+	s.debug.Print(resp.Status)
 
 	body = s.readClose(resp.Body)
 	if resp.StatusCode >= 400 {
@@ -127,4 +133,17 @@ func (s *System) sendRequest(r *http.Request) (body *bytes.Buffer, err error) {
 		return nil, fmt.Errorf(resp.Status)
 	}
 	return
+}
+
+func (s *System) readClose(in io.ReadCloser) *bytes.Buffer {
+	var buf bytes.Buffer
+	io.Copy(&buf, in)
+	in.Close()
+
+	if s.debugOn {
+		var tidy bytes.Buffer
+		json.Indent(&tidy, buf.Bytes(), "", "  ")
+		s.debug.Print(tidy.String())
+	}
+	return &buf
 }

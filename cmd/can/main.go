@@ -28,7 +28,9 @@ func main() {
 		apiUrl = cli.Option("--api-url, $OPENAI_API_URL").Url("https://api.openai.com")
 	)
 
-	can.SetDebug(cli.Flag("--debug"))
+	if cli.Flag("--debug") {
+		s.SetDebugOutput(os.Stderr)
+	}
 
 	u := cli.Usage()
 	u.Example("Ask a question",

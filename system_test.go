@@ -17,46 +17,46 @@ func TestSystem_RunIssues(t *testing.T) {
 		txt string
 		*System
 	}{
-		{"empty", &System{}},
+		{"empty", NewSystem()},
 		{"unreadable key file",
 			func() *System {
 				dst := filepath.Join(t.TempDir(), "somefile")
 				_ = os.WriteFile(dst, []byte("secret"), 0000)
-				var c System
-				c.input = "some text"
-				c.SetAPIKeyFile(dst)
-				return &c
+				s := NewSystem()
+				s.input = "some text"
+				s.SetAPIKeyFile(dst)
+				return s
 			}(),
 		},
 		{"missing API.URL",
 			func() *System {
-				var c System
-				c.input = "some text"
-				c.SetAPIKey("secret")
-				return &c
+				s := NewSystem()
+				s.input = "some text"
+				s.SetAPIKey("secret")
+				return s
 			}(),
 		},
 		{"unreadable src file",
 			func() *System {
 				dst := filepath.Join(t.TempDir(), "somefile")
 				_ = os.WriteFile(dst, []byte("data"), 0000)
-				var c System
-				c.input = "some text"
-				c.api.Key = "secret"
+				s := NewSystem()
+				s.input = "some text"
+				s.api.Key = "secret"
 				u, _ := url.Parse("http://example.com")
-				c.SetAPIUrl(u)
-				c.SetSrc(dst)
-				return &c
+				s.SetAPIUrl(u)
+				s.SetSrc(dst)
+				return s
 			}(),
 		},
 		{"unreadable src file",
 			func() *System {
-				var c System
-				c.SetSrc("2 apples, 3 oranges")
-				c.input = "count fruits"
-				c.api.Key = "secret"
-				c.api.URL, _ = url.Parse("http://localhost:12345") // no such host
-				return &c
+				s := NewSystem()
+				s.SetSrc("2 apples, 3 oranges")
+				s.input = "count fruits"
+				s.api.Key = "secret"
+				s.api.URL, _ = url.Parse("http://localhost:12345") // no such host
+				return s
 			}(),
 		},
 	}
@@ -81,51 +81,52 @@ func TestSystem_Run(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	var c System
-	c.api.URL, _ = url.Parse(srv.URL)
-	c.api.Key = "secret"
-	c.SetSysContent("As a nice assistant.")
-	c.input = "Hello!"
-	if err := c.Run(); err != nil {
+	s := NewSystem()
+	s.api.URL, _ = url.Parse(srv.URL)
+	s.api.Key = "secret"
+	s.SetSysContent("As a nice assistant.")
+	s.input = "Hello!"
+	if err := s.Run(); err != nil {
 		t.Error(err)
 	}
 
-	c.SetSrc("hallo warld")
-	c.SetInput("fix spelling")
-	if err := c.Run(); err != nil {
+	s.SetSrc("hallo warld")
+	s.SetInput("fix spelling")
+	if err := s.Run(); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestSystem_loadkey(t *testing.T) {
-	var c System
-	if err := c.loadkey(); err != nil {
+	s := NewSystem()
+	if err := s.loadkey(); err != nil {
 		t.Error(err)
 	}
 
 	dst := filepath.Join(t.TempDir(), "somefile")
 	_ = os.WriteFile(dst, []byte("secret"), 0400)
-	c.api.KeyFile = dst
-	if err := c.loadkey(); err != nil {
+	s.SetAPIKeyFile(dst)
+	if err := s.loadkey(); err != nil {
 		t.Error(err)
 	}
 
 	// without read permission
 	os.Chmod(dst, 0000)
-	c.api.Key = "" // reset
-	if err := c.loadkey(); err == nil {
+	s.SetAPIKey("") // reset
+	if err := s.loadkey(); err == nil {
 		t.Error("expect error")
 	}
 }
 
 func TestSystem_Settings(t *testing.T) {
-	var s System
+	s := NewSystem()
 	s.SetUpdateSrc(true)
 	s.SetUpdateSrc(false)
+	s.SetDebugOutput(nil)
 }
 
 func TestSystem_sendRequest(t *testing.T) {
-	var sys System
+	sys := NewSystem()
 	t.Run("ok", func(t *testing.T) {
 		s := httptest.NewServer(serve("{}", 200))
 		defer s.Close()
@@ -157,12 +158,10 @@ func TestSystem_sendRequest(t *testing.T) {
 }
 
 func Test_readClose(t *testing.T) {
-	debugOn = true // global todo remove
-	in := `{"name": "carl"}`
 	var buf bytes.Buffer
-	debug.SetOutput(&buf)
-	var s System
-	s.SetDebugOn(true)
+	s := NewSystem()
+	s.SetDebugOutput(&buf)
+	in := `{"name": "carl"}`
 	s.readClose(ioutil.NopCloser(strings.NewReader(in)))
 	if buf.Len() == 0 {
 		t.Fail()
