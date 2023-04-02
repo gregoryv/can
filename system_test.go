@@ -21,7 +21,7 @@ func TestSystem_RunIssues(t *testing.T) {
 				_ = os.WriteFile(dst, []byte("secret"), 0000)
 				var c System
 				c.Input = "some text"
-				c.API.KeyFile = dst
+				c.SetAPIKeyFile(dst)
 				return &c
 			}(),
 		},
@@ -29,7 +29,7 @@ func TestSystem_RunIssues(t *testing.T) {
 			func() *System {
 				var c System
 				c.Input = "some text"
-				c.API.Key = "secret"
+				c.SetAPIKey("secret")
 				return &c
 			}(),
 		},
@@ -39,8 +39,9 @@ func TestSystem_RunIssues(t *testing.T) {
 				_ = os.WriteFile(dst, []byte("data"), 0000)
 				var c System
 				c.Input = "some text"
-				c.API.Key = "secret"
-				c.API.URL, _ = url.Parse("http://example.com")
+				c.api.Key = "secret"
+				u, _ := url.Parse("http://example.com")
+				c.SetAPIUrl(u)
 				c.Src = dst
 				return &c
 			}(),
@@ -50,8 +51,8 @@ func TestSystem_RunIssues(t *testing.T) {
 				var c System
 				c.Src = "2 apples, 3 oranges"
 				c.Input = "count fruits"
-				c.API.Key = "secret"
-				c.API.URL, _ = url.Parse("http://localhost:12345") // no such host
+				c.api.Key = "secret"
+				c.api.URL, _ = url.Parse("http://localhost:12345") // no such host
 				return &c
 			}(),
 		},
@@ -78,8 +79,8 @@ func TestSystem_Run(t *testing.T) {
 	defer srv.Close()
 
 	var c System
-	c.API.URL, _ = url.Parse(srv.URL)
-	c.API.Key = "secret"
+	c.api.URL, _ = url.Parse(srv.URL)
+	c.api.Key = "secret"
 	c.SysContent = "As a nice assistant."
 	c.Input = "Hello!"
 	if err := c.Run(); err != nil {
@@ -101,14 +102,14 @@ func TestSystem_loadkey(t *testing.T) {
 
 	dst := filepath.Join(t.TempDir(), "somefile")
 	_ = os.WriteFile(dst, []byte("secret"), 0400)
-	c.API.KeyFile = dst
+	c.api.KeyFile = dst
 	if err := c.loadkey(); err != nil {
 		t.Error(err)
 	}
 
 	// without read permission
 	os.Chmod(dst, 0000)
-	c.API.Key = "" // reset
+	c.api.Key = "" // reset
 	if err := c.loadkey(); err == nil {
 		t.Error("expect error")
 	}

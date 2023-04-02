@@ -18,13 +18,16 @@ func main() {
 
 	s.SysContent = cli.Option("--system-content, $CAN_SYSTEM_CONTENT").String("")
 	s.Src = cli.Option("-in", "path to file or block of text").String("")
-	s.API.KeyFile = cli.Option(
+	var (
+	keyFile = cli.Option(
 		"--api-key-file, $OPENAI_API_KEY_FILE",
 	).String(
 		os.ExpandEnv("$HOME/.openai.key"),
 	)
-	s.API.Key = cli.Option("--api-key, $OPENAI_API_KEY").String("")
-	s.API.URL = cli.Option("--api-url, $OPENAI_API_URL").Url("https://api.openai.com")
+		key = cli.Option("--api-key, $OPENAI_API_KEY").String("")
+		apiUrl = cli.Option("--api-url, $OPENAI_API_URL").Url("https://api.openai.com")		
+	)
+
 
 	can.SetDebug(cli.Flag("--debug"))
 
@@ -39,6 +42,9 @@ func main() {
 	)
 	cli.Parse()
 
+	s.SetAPIKeyFile(keyFile)
+	s.SetAPIKey(key)
+	s.SetAPIUrl(apiUrl)
 	s.Input = strings.Join(cli.Args(), " ")
 
 	log.SetFlags(0)
