@@ -17,7 +17,7 @@ type System struct {
 	}
 
 	sysContent string
-	UpdateSrc  bool
+	updateSrc  bool
 	Src        string // ie. file or block of text
 	Input      string
 }
@@ -26,6 +26,7 @@ func (s *System) SetAPIUrl(v *url.URL)   { s.api.URL = v }
 func (s *System) SetAPIKey(v string)     { s.api.Key = v }
 func (s *System) SetAPIKeyFile(v string) { s.api.KeyFile = v }
 func (s *System) SetSysContent(v string) { s.sysContent = v }
+func (s *System) SetUpdateSrc(v bool)    { s.updateSrc = v }
 
 func (s *System) Run() error {
 	if len(s.Input) == 0 {
@@ -46,7 +47,7 @@ func (s *System) Run() error {
 		if err := c.SetInput(s.Src); err != nil {
 			return err
 		}
-		c.UpdateSrc = c.UpdateSrc
+		c.UpdateSrc = s.updateSrc
 		c.Instruction = s.Input
 		cmd = c
 

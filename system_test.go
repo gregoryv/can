@@ -113,5 +113,10 @@ func TestSystem_loadkey(t *testing.T) {
 	if err := c.loadkey(); err == nil {
 		t.Error("expect error")
 	}
+}
 
+func TestSystem_Settings(t *testing.T) {
+	var s System
+	s.SetUpdateSrc(true)
+	s.SetUpdateSrc(false)
 }
