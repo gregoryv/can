@@ -81,7 +81,7 @@ func TestSystem_Run(t *testing.T) {
 	var c System
 	c.api.URL, _ = url.Parse(srv.URL)
 	c.api.Key = "secret"
-	c.SysContent = "As a nice assistant."
+	c.SetSysContent("As a nice assistant.")
 	c.Input = "Hello!"
 	if err := c.Run(); err != nil {
 		t.Error(err)

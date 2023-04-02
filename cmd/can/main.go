@@ -16,18 +16,18 @@ func main() {
 	// Skippy the magnificent
 	var s can.System
 
-	s.SysContent = cli.Option("--system-content, $CAN_SYSTEM_CONTENT").String("")
-	s.Src = cli.Option("-in", "path to file or block of text").String("")
-	var (
-	keyFile = cli.Option(
-		"--api-key-file, $OPENAI_API_KEY_FILE",
-	).String(
-		os.ExpandEnv("$HOME/.openai.key"),
-	)
-		key = cli.Option("--api-key, $OPENAI_API_KEY").String("")
-		apiUrl = cli.Option("--api-url, $OPENAI_API_URL").Url("https://api.openai.com")		
-	)
 
+	var (
+		sysContent = cli.Option("--system-content, $CAN_SYSTEM_CONTENT").String("")
+		src =	cli.Option("-in", "path to file or block of text").String("")
+		keyFile = cli.Option(
+			"--api-key-file, $OPENAI_API_KEY_FILE",
+		).String(
+			os.ExpandEnv("$HOME/.openai.key"),
+		)
+		key    = cli.Option("--api-key, $OPENAI_API_KEY").String("")
+		apiUrl = cli.Option("--api-url, $OPENAI_API_URL").Url("https://api.openai.com")
+	)
 
 	can.SetDebug(cli.Flag("--debug"))
 
@@ -45,6 +45,8 @@ func main() {
 	s.SetAPIKeyFile(keyFile)
 	s.SetAPIKey(key)
 	s.SetAPIUrl(apiUrl)
+	s.SetSysContent(sysContent)
+	s.Src =src
 	s.Input = strings.Join(cli.Args(), " ")
 
 	log.SetFlags(0)

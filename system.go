@@ -16,7 +16,7 @@ type System struct {
 		Key      string
 	}
 
-	SysContent string
+	sysContent string
 	UpdateSrc  bool
 	Src        string // ie. file or block of text
 	Input      string
@@ -25,6 +25,7 @@ type System struct {
 func (s *System) SetAPIUrl(v *url.URL)   { s.api.URL = v }
 func (s *System) SetAPIKey(v string)     { s.api.Key = v }
 func (s *System) SetAPIKeyFile(v string) { s.api.KeyFile = v }
+func (s *System) SetSysContent(v string) { s.sysContent = v }
 
 func (s *System) Run() error {
 	if len(s.Input) == 0 {
@@ -52,7 +53,7 @@ func (s *System) Run() error {
 	default:
 		c := newChat()
 		c.Content = s.Input
-		c.SystemContent = s.SysContent
+		c.SystemContent = s.sysContent
 		cmd = c
 	}
 
