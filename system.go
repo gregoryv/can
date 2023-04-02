@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-type Can struct {
+type System struct {
 	API struct {
 		*url.URL // host:port
 		KeyFile  string
@@ -22,7 +22,7 @@ type Can struct {
 	Input      string
 }
 
-func (C *Can) Run() error {
+func (C *System) Run() error {
 	if len(C.Input) == 0 {
 		return fmt.Errorf("missing input")
 	}
@@ -66,7 +66,7 @@ func (C *Can) Run() error {
 	return cmd.HandleResponse(body)
 }
 
-func (C *Can) loadkey() error {
+func (C *System) loadkey() error {
 	if C.API.Key != "" {
 		return nil
 	}

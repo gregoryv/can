@@ -13,7 +13,7 @@ func main() {
 	cli := cmdline.NewBasicParser()
 
 	// Skippy the magnificent
-	var c Can
+	var c System
 
 	c.SysContent = cli.Option("--system-content, $CAN_SYSTEM_CONTENT").String("")
 	c.Src = cli.Option("-in", "path to file or block of text").String("")
