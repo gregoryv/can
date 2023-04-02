@@ -23,6 +23,7 @@ func TestCan_Run(t *testing.T) {
 
 	var c Can
 	c.API.URL, _ = url.Parse(srv.URL)
+	c.SysContent = "As a nice assistant."
 	c.Input = "Hello!"
 	if err := c.Run(); err != nil {
 		t.Error(err)
