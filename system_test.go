@@ -1,11 +1,14 @@
 package can
 
 import (
+	"bytes"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -119,4 +122,49 @@ func TestSystem_Settings(t *testing.T) {
 	var s System
 	s.SetUpdateSrc(true)
 	s.SetUpdateSrc(false)
+}
+
+func TestSystem_sendRequest(t *testing.T) {
+	var sys System
+	t.Run("ok", func(t *testing.T) {
+		s := httptest.NewServer(serve("{}", 200))
+		defer s.Close()
+
+		r, _ := http.NewRequest("GET", s.URL, http.NoBody)
+		body, _ := sys.sendRequest(r)
+		if body == nil {
+			t.Error("unexpected empty body")
+		}
+	})
+
+	t.Run("bad request", func(t *testing.T) {
+		s := httptest.NewServer(serve("{}", 400))
+		defer s.Close()
+
+		r, _ := http.NewRequest("GET", s.URL, http.NoBody)
+		if _, err := sys.sendRequest(r); err == nil {
+			t.Error("unexpected error")
+		}
+	})
+
+	t.Run("server down", func(t *testing.T) {
+		r, _ := http.NewRequest("GET", "http://localhost:12345", http.NoBody)
+		if _, err := sys.sendRequest(r); err == nil {
+			t.Error("bad request was ok")
+		}
+	})
+
+}
+
+func Test_readClose(t *testing.T) {
+	debugOn = true // global todo remove
+	in := `{"name": "carl"}`
+	var buf bytes.Buffer
+	debug.SetOutput(&buf)
+	var s System
+	s.SetDebugOn(true)
+	s.readClose(ioutil.NopCloser(strings.NewReader(in)))
+	if buf.Len() == 0 {
+		t.Fail()
+	}
 }

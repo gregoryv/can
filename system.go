@@ -2,8 +2,10 @@ package can
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -20,6 +22,8 @@ type System struct {
 	updateSrc  bool
 	src        string // ie. file or block of text
 	input      string
+
+	debugOn bool
 }
 
 func (s *System) SetAPIUrl(v *url.URL)   { s.api.URL = v }
@@ -29,6 +33,7 @@ func (s *System) SetSysContent(v string) { s.sysContent = v }
 func (s *System) SetUpdateSrc(v bool)    { s.updateSrc = v }
 func (s *System) SetSrc(v string)        { s.src = v }
 func (s *System) SetInput(v string)      { s.input = v }
+func (s *System) SetDebugOn(v bool)      { s.debugOn = v }
 
 func (s *System) Run() error {
 	if len(s.input) == 0 {
@@ -66,7 +71,7 @@ func (s *System) Run() error {
 	r.URL.Host = s.api.URL.Host
 	r.URL.Scheme = s.api.URL.Scheme
 
-	body, err := sendRequest(r)
+	body, err := s.sendRequest(r)
 	if err != nil {
 		return err
 	}
@@ -92,4 +97,34 @@ func (s *System) loadkey() error {
 type command interface {
 	MakeRequest() *http.Request
 	HandleResponse(io.Reader) error
+}
+
+func (s *System) readClose(in io.ReadCloser) *bytes.Buffer {
+	var buf bytes.Buffer
+	io.Copy(&buf, in)
+	in.Close()
+
+	if debugOn {
+		var tidy bytes.Buffer
+		json.Indent(&tidy, buf.Bytes(), "", "  ")
+		debug.Print(tidy.String())
+	}
+	return &buf
+}
+
+func (s *System) sendRequest(r *http.Request) (body *bytes.Buffer, err error) {
+	// send request
+	debug.Println(r.Method, r.URL)
+	resp, err := http.DefaultClient.Do(r)
+	if err != nil {
+		return nil, fmt.Errorf("sendRequest %w", err)
+	}
+	debug.Print(resp.Status)
+
+	body = s.readClose(resp.Body)
+	if resp.StatusCode >= 400 {
+		log.Print(body.String())
+		return nil, fmt.Errorf(resp.Status)
+	}
+	return
 }
