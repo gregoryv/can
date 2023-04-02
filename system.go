@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"errors"
 )
 
 // NewSystem returns a system with debug log is disabled.
@@ -146,4 +147,159 @@ func (s *System) readClose(in io.ReadCloser) *bytes.Buffer {
 		s.debug.Print(tidy.String())
 	}
 	return &buf
+}
+
+
+func newChat() *chat {
+	return &chat{
+		Model:   "gpt-3.5-turbo",
+		Content: "say hello world!",
+	}
+}
+
+type chat struct {
+	Model         string
+	Content       string
+	SystemContent string
+
+	// result destination
+	Out io.Writer
+}
+
+func (c *chat) MakeRequest() *http.Request {
+	type m struct {
+		Role    string `json:"role"`
+		Content string `json:"content"`
+	}
+	messages := []m{m{"user", c.Content}}
+	if v := c.SystemContent; v != "" {
+		messages = append(messages, m{"system", v})
+	}
+	input := map[string]any{
+		"model":    c.Model,
+		"messages": messages,
+	}
+	data := should(json.Marshal(input))
+	body := bytes.NewReader(data)
+	r, _ := http.NewRequest("POST", "/v1/chat/completions", body)
+	r.Header.Set("content-type", "application/json")
+	return r
+}
+
+func (c *chat) HandleResponse(body io.Reader) error {
+	// parse result
+	var result struct {
+		Choices []struct{ Message struct{ Content string } }
+	}
+	if err := json.NewDecoder(body).Decode(&result); err != nil {
+		if !errors.Is(err, io.EOF) {
+			return err
+		}
+	}
+	if len(result.Choices) == 0 {
+		return fmt.Errorf("Chat.HandleResponse: no choices")
+	}
+	if c.Out == nil {
+		c.Out = os.Stdout
+	}
+
+	// act on result
+	_, err := c.Out.Write([]byte(result.Choices[0].Message.Content))
+	return err
+}
+
+
+func newEdits() *edits {
+	return &edits{
+		Model:       "text-davinci-edit-001",
+		Instruction: "echo",
+	}
+}
+
+type edits struct {
+	Model       string
+	input       string
+	Instruction string
+
+	// update input file
+	UpdateSrc bool
+
+	// result destination
+	Out io.Writer
+
+	// path to file
+	src       string
+	srcIsFile bool
+}
+
+// SetInput sets the input to v. If v is a file the content is of that
+// file is used.
+func (c *edits) SetInput(v string) error {
+	if isFile(v) {
+		c.src = v
+		c.srcIsFile = true
+		data, err := os.ReadFile(v)
+		if err != nil {
+			return fmt.Errorf("SetInput %w", err)
+		}
+		c.input = string(data)
+	} else {
+		c.input = v
+	}
+	return nil
+}
+
+func (c *edits) MakeRequest() *http.Request {
+	input := map[string]any{
+		"model":       c.Model,
+		"input":       c.input,
+		"instruction": c.Instruction,
+	}
+	data := should(json.Marshal(input))
+	body := bytes.NewReader(data)
+	r, _ := http.NewRequest("POST", "/v1/edits", body)
+	r.Header.Set("content-type", "application/json")
+	return r
+}
+
+func (c *edits) HandleResponse(body io.Reader) error {
+	// parse result
+	var result struct {
+		Choices []struct{ Text string }
+	}
+	if err := json.NewDecoder(body).Decode(&result); err != nil {
+		if !errors.Is(err, io.EOF) {
+			return fmt.Errorf("Edits.HandleResponse: %w", err)
+		}
+	}
+	if len(result.Choices) == 0 {
+		return fmt.Errorf("Edits.HandleResponse: no choices")
+	}
+
+	// act on result
+	if c.srcIsFile && c.UpdateSrc {
+		out, err := os.Create(c.src)
+		if err != nil {
+			return err
+		}
+		c.Out = out
+	}
+	if c.Out == nil {
+		c.Out = os.Stdout
+	}
+	_, err := c.Out.Write([]byte(result.Choices[0].Text))
+	return err
+}
+
+
+func isFile(src string) bool {
+	_, err := os.Stat(src)
+	return err == nil
+}
+
+func should(data []byte, err error) []byte {
+	if err != nil {
+		log.Print(err)
+	}
+	return data
 }
