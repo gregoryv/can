@@ -28,6 +28,16 @@ func Test_should(t *testing.T) {
 	}
 }
 
+func TestSetDebug(t *testing.T) {
+	SetDebug(true)
+	before := debugOn
+	SetDebug(false)
+	after := debugOn
+	if before == after {
+		t.Fail()
+	}
+}
+
 func Test_sendRequest(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		s := httptest.NewServer(serve("{}", 200))

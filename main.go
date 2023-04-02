@@ -23,7 +23,7 @@ func main() {
 		os.ExpandEnv("$HOME/.openai.key"),
 	)
 	c.API.Key = cli.Option("--api-key, $OPENAI_API_KEY").String("")
-	debugOn = cli.Flag("--debug")
+	SetDebug(cli.Flag("--debug"))
 
 	u := cli.Usage()
 	u.Example("Ask a question",
