@@ -3,7 +3,6 @@ package main
 
 import (
 	"log"
-	"net/url"
 	"os"
 	"strings"
 
@@ -24,6 +23,8 @@ func main() {
 		os.ExpandEnv("$HOME/.openai.key"),
 	)
 	c.API.Key = cli.Option("--api-key, $OPENAI_API_KEY").String("")
+	c.API.URL = cli.Option("--api-url, $OPENAI_API_URL").Url("https://api.openai.com")
+
 	SetDebug(cli.Flag("--debug"))
 
 	u := cli.Usage()
@@ -38,11 +39,12 @@ func main() {
 	cli.Parse()
 
 	c.Input = strings.Join(cli.Args(), " ")
-	c.API.URL, _ = url.Parse("https://api.openai.com")
 
 	log.SetFlags(0)
 
 	if err := c.Run(); err != nil {
-		log.Fatal(err)
+		fatal(err)
 	}
 }
+
+var fatal func(...interface{}) = log.Fatal
