@@ -45,7 +45,7 @@ func TestEdits_HandleResponse(t *testing.T) {
 		t.Error("empty result should fail")
 	}
 
-	if err := c.HandleResponse(strings.NewReader(valid)); err != nil {
+	if err := c.HandleResponse(strings.NewReader(validEditsResponse)); err != nil {
 		t.Error(err)
 	}
 
@@ -63,7 +63,7 @@ func TestEdits_HandleResponse(t *testing.T) {
 	os.WriteFile(dst, []byte(""), 0644)
 	c.SetInput(dst)
 	c.UpdateSrc = true
-	if err := c.HandleResponse(strings.NewReader(valid)); err != nil {
+	if err := c.HandleResponse(strings.NewReader(validEditsResponse)); err != nil {
 		t.Fatal(err)
 	}
 	got, _ := os.ReadFile(dst)
@@ -72,13 +72,13 @@ func TestEdits_HandleResponse(t *testing.T) {
 	}
 
 	os.Chmod(dst, 0500)
-	if err := c.HandleResponse(strings.NewReader(valid)); err == nil {
+	if err := c.HandleResponse(strings.NewReader(validEditsResponse)); err == nil {
 		t.Fatal("expect error on inadequate write permission")
 	}
 }
 
 // from https://platform.openai.com/docs/api-reference/edits/create
-const valid = `{
+const validEditsResponse = `{
   "object": "edit",
   "created": 1589478378,
   "choices": [

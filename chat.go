@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -44,9 +45,7 @@ func (c *Chat) MakeRequest() *http.Request {
 	}
 	data := should(json.Marshal(input))
 	body := bytes.NewReader(data)
-	r, _ := http.NewRequest(
-		"POST", "https://api.openai.com/v1/chat/completions", body,
-	)
+	r, _ := http.NewRequest("POST", "/v1/chat/completions", body)
 	r.Header.Set("content-type", "application/json")
 	return r
 }
@@ -57,10 +56,12 @@ func (c *Chat) HandleResponse(body io.Reader) error {
 		Choices []struct{ Message struct{ Content string } }
 	}
 	if err := json.NewDecoder(body).Decode(&result); err != nil {
-		return err
+		if !errors.Is(err, io.EOF) {
+			return err
+		}
 	}
 	if len(result.Choices) == 0 {
-		return fmt.Errorf("no choices")
+		return fmt.Errorf("Chat.HandleResponse: no choices")
 	}
 	if c.Out == nil {
 		c.Out = os.Stdout

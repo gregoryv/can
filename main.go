@@ -12,6 +12,7 @@ import (
 func main() {
 	cli := cmdline.NewBasicParser()
 
+	// Skippy the magnificent
 	var c Can
 
 	c.SysContent = cli.Option("--system-content, $CAN_SYSTEM_CONTENT").String("")
@@ -36,6 +37,8 @@ func main() {
 	cli.Parse()
 
 	c.Input = strings.Join(cli.Args(), " ")
+
+	log.SetFlags(0)
 
 	if err := c.Run(); err != nil {
 		log.Fatal(err)

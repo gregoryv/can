@@ -4,26 +4,25 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
+	"net/url"
 	"os"
 )
 
 type Can struct {
 	API struct {
-		Host    string // host:port
-		KeyFile string
-		Key     string
+		*url.URL // host:port
+		KeyFile  string
+		Key      string
 	}
 
 	SysContent string
+	UpdateSrc  bool
 	Src        string // ie. file or block of text
 	Input      string
 }
 
 func (C *Can) Run() error {
-
-	log.SetFlags(0)
 	if debugOn {
 		debug.SetOutput(os.Stderr)
 	}
@@ -36,6 +35,10 @@ func (C *Can) Run() error {
 		return err
 	}
 
+	if C.API.URL == nil {
+		C.API.URL, _ = url.Parse("https://api.openai.com")
+	}
+
 	// select action
 	var cmd Command
 	switch {
@@ -44,7 +47,7 @@ func (C *Can) Run() error {
 		if err := c.SetInput(C.Src); err != nil {
 			return err
 		}
-		c.UpdateSrc = true
+		c.UpdateSrc = c.UpdateSrc
 		c.Instruction = C.Input
 		cmd = c
 
@@ -58,6 +61,8 @@ func (C *Can) Run() error {
 	// execute action
 	r := cmd.MakeRequest()
 	r.Header.Set("authorization", "Bearer "+C.API.Key)
+	r.URL.Host = C.API.URL.Host
+	r.URL.Scheme = C.API.URL.Scheme
 
 	body, err := sendRequest(r)
 	if err != nil {

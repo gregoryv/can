@@ -11,6 +11,16 @@ import (
 	"os"
 )
 
+func SetDebug(v bool) {
+	if v {
+		debugOn = true
+		debug.SetOutput(os.Stderr)
+		return
+	}
+	debugOn = false
+	debug.SetOutput(ioutil.Discard)
+}
+
 var (
 	debugOn bool
 	debug   = log.New(ioutil.Discard, "can debug ", log.LstdFlags)
