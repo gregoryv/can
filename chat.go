@@ -10,14 +10,14 @@ import (
 	"os"
 )
 
-func NewChat() *Chat {
-	return &Chat{
+func newChat() *chat {
+	return &chat{
 		Model:   "gpt-3.5-turbo",
 		Content: "say hello world!",
 	}
 }
 
-type Chat struct {
+type chat struct {
 	Model         string
 	Content       string
 	SystemContent string
@@ -26,7 +26,7 @@ type Chat struct {
 	Out io.Writer
 }
 
-func (c *Chat) MakeRequest() *http.Request {
+func (c *chat) MakeRequest() *http.Request {
 	type m struct {
 		Role    string `json:"role"`
 		Content string `json:"content"`
@@ -46,7 +46,7 @@ func (c *Chat) MakeRequest() *http.Request {
 	return r
 }
 
-func (c *Chat) HandleResponse(body io.Reader) error {
+func (c *chat) HandleResponse(body io.Reader) error {
 	// parse result
 	var result struct {
 		Choices []struct{ Message struct{ Content string } }

@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func TestChat(t *testing.T) {
-	c := NewChat()
+func Test_chat(t *testing.T) {
+	c := newChat()
 
 	if r := c.MakeRequest(); r == nil {
 		t.Error("nil request")

@@ -46,7 +46,7 @@ func (s *System) Run() error {
 		cmd = c
 
 	default:
-		c := NewChat()
+		c := newChat()
 		c.Content = s.Input
 		c.SystemContent = s.SysContent
 		cmd = c
