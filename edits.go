@@ -19,7 +19,7 @@ func newEdits() *edits {
 
 type edits struct {
 	Model       string
-	Input       string
+	input       string
 	Instruction string
 
 	// update input file
@@ -43,9 +43,9 @@ func (c *edits) SetInput(v string) error {
 		if err != nil {
 			return fmt.Errorf("SetInput %w", err)
 		}
-		c.Input = string(data)
+		c.input = string(data)
 	} else {
-		c.Input = v
+		c.input = v
 	}
 	return nil
 }
@@ -53,7 +53,7 @@ func (c *edits) SetInput(v string) error {
 func (c *edits) MakeRequest() *http.Request {
 	input := map[string]any{
 		"model":       c.Model,
-		"input":       c.Input,
+		"input":       c.input,
 		"instruction": c.Instruction,
 	}
 	data := should(json.Marshal(input))

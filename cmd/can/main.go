@@ -46,7 +46,7 @@ func main() {
 	s.SetAPIUrl(apiUrl)
 	s.SetSysContent(sysContent)
 	s.SetSrc(src)
-	s.Input = strings.Join(cli.Args(), " ")
+	s.SetInput(strings.Join(cli.Args(), " "))
 
 	log.SetFlags(0)
 

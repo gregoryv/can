@@ -19,7 +19,7 @@ type System struct {
 	sysContent string
 	updateSrc  bool
 	src        string // ie. file or block of text
-	Input      string
+	input      string
 }
 
 func (s *System) SetAPIUrl(v *url.URL)   { s.api.URL = v }
@@ -28,9 +28,10 @@ func (s *System) SetAPIKeyFile(v string) { s.api.KeyFile = v }
 func (s *System) SetSysContent(v string) { s.sysContent = v }
 func (s *System) SetUpdateSrc(v bool)    { s.updateSrc = v }
 func (s *System) SetSrc(v string)        { s.src = v }
+func (s *System) SetInput(v string)      { s.input = v }
 
 func (s *System) Run() error {
-	if len(s.Input) == 0 {
+	if len(s.input) == 0 {
 		return fmt.Errorf("missing input")
 	}
 	if err := s.loadkey(); err != nil {
@@ -49,12 +50,12 @@ func (s *System) Run() error {
 			return err
 		}
 		c.UpdateSrc = s.updateSrc
-		c.Instruction = s.Input
+		c.Instruction = s.input
 		cmd = c
 
 	default:
 		c := newChat()
-		c.Content = s.Input
+		c.Content = s.input
 		c.SystemContent = s.sysContent
 		cmd = c
 	}

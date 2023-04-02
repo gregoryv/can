@@ -20,7 +20,7 @@ func TestSystem_RunIssues(t *testing.T) {
 				dst := filepath.Join(t.TempDir(), "somefile")
 				_ = os.WriteFile(dst, []byte("secret"), 0000)
 				var c System
-				c.Input = "some text"
+				c.input = "some text"
 				c.SetAPIKeyFile(dst)
 				return &c
 			}(),
@@ -28,7 +28,7 @@ func TestSystem_RunIssues(t *testing.T) {
 		{"missing API.URL",
 			func() *System {
 				var c System
-				c.Input = "some text"
+				c.input = "some text"
 				c.SetAPIKey("secret")
 				return &c
 			}(),
@@ -38,7 +38,7 @@ func TestSystem_RunIssues(t *testing.T) {
 				dst := filepath.Join(t.TempDir(), "somefile")
 				_ = os.WriteFile(dst, []byte("data"), 0000)
 				var c System
-				c.Input = "some text"
+				c.input = "some text"
 				c.api.Key = "secret"
 				u, _ := url.Parse("http://example.com")
 				c.SetAPIUrl(u)
@@ -50,7 +50,7 @@ func TestSystem_RunIssues(t *testing.T) {
 			func() *System {
 				var c System
 				c.SetSrc("2 apples, 3 oranges")
-				c.Input = "count fruits"
+				c.input = "count fruits"
 				c.api.Key = "secret"
 				c.api.URL, _ = url.Parse("http://localhost:12345") // no such host
 				return &c
@@ -82,13 +82,13 @@ func TestSystem_Run(t *testing.T) {
 	c.api.URL, _ = url.Parse(srv.URL)
 	c.api.Key = "secret"
 	c.SetSysContent("As a nice assistant.")
-	c.Input = "Hello!"
+	c.input = "Hello!"
 	if err := c.Run(); err != nil {
 		t.Error(err)
 	}
 
 	c.SetSrc("hallo warld")
-	c.Input = "fix spelling"
+	c.SetInput("fix spelling")
 	if err := c.Run(); err != nil {
 		t.Error(err)
 	}
