@@ -39,7 +39,7 @@ func (s *System) Run() error {
 	}
 
 	// select action
-	var cmd Command
+	var cmd command
 	switch {
 	case s.Src != "":
 		c := newEdits()
@@ -86,7 +86,7 @@ func (s *System) loadkey() error {
 	return nil
 }
 
-type Command interface {
+type command interface {
 	MakeRequest() *http.Request
 	HandleResponse(io.Reader) error
 }

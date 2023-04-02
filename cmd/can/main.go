@@ -16,11 +16,10 @@ func main() {
 	// Skippy the magnificent
 	var s can.System
 
-
 	var (
 		sysContent = cli.Option("--system-content, $CAN_SYSTEM_CONTENT").String("")
-		src =	cli.Option("-in", "path to file or block of text").String("")
-		keyFile = cli.Option(
+		src        = cli.Option("-in", "path to file or block of text").String("")
+		keyFile    = cli.Option(
 			"--api-key-file, $OPENAI_API_KEY_FILE",
 		).String(
 			os.ExpandEnv("$HOME/.openai.key"),
@@ -46,7 +45,7 @@ func main() {
 	s.SetAPIKey(key)
 	s.SetAPIUrl(apiUrl)
 	s.SetSysContent(sysContent)
-	s.Src =src
+	s.Src = src
 	s.Input = strings.Join(cli.Args(), " ")
 
 	log.SetFlags(0)
