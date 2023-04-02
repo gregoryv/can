@@ -41,7 +41,7 @@ func (c *Edits) SetInput(v string) error {
 		c.srcIsFile = true
 		data, err := os.ReadFile(v)
 		if err != nil {
-			return fmt.Errorf("SetSrc %w", err)
+			return fmt.Errorf("SetInput %w", err)
 		}
 		c.Input = string(data)
 	} else {

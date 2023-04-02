@@ -23,10 +23,6 @@ type Can struct {
 }
 
 func (C *Can) Run() error {
-	if debugOn {
-		debug.SetOutput(os.Stderr)
-	}
-
 	if len(C.Input) == 0 {
 		return fmt.Errorf("missing input")
 	}
@@ -36,7 +32,7 @@ func (C *Can) Run() error {
 	}
 
 	if C.API.URL == nil {
-		C.API.URL, _ = url.Parse("https://api.openai.com")
+		return fmt.Errorf("Can.Run: missing API.URL")
 	}
 
 	// select action

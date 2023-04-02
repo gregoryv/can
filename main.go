@@ -3,6 +3,7 @@ package main
 
 import (
 	"log"
+	"net/url"
 	"os"
 	"strings"
 
@@ -37,6 +38,7 @@ func main() {
 	cli.Parse()
 
 	c.Input = strings.Join(cli.Args(), " ")
+	c.API.URL, _ = url.Parse("https://api.openai.com")
 
 	log.SetFlags(0)
 
