@@ -18,7 +18,7 @@ type System struct {
 
 	sysContent string
 	updateSrc  bool
-	Src        string // ie. file or block of text
+	src        string // ie. file or block of text
 	Input      string
 }
 
@@ -27,6 +27,7 @@ func (s *System) SetAPIKey(v string)     { s.api.Key = v }
 func (s *System) SetAPIKeyFile(v string) { s.api.KeyFile = v }
 func (s *System) SetSysContent(v string) { s.sysContent = v }
 func (s *System) SetUpdateSrc(v bool)    { s.updateSrc = v }
+func (s *System) SetSrc(v string)        { s.src = v }
 
 func (s *System) Run() error {
 	if len(s.Input) == 0 {
@@ -42,9 +43,9 @@ func (s *System) Run() error {
 	// select action
 	var cmd command
 	switch {
-	case s.Src != "":
+	case s.src != "":
 		c := newEdits()
-		if err := c.SetInput(s.Src); err != nil {
+		if err := c.SetInput(s.src); err != nil {
 			return err
 		}
 		c.UpdateSrc = s.updateSrc

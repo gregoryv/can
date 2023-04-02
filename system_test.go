@@ -42,14 +42,14 @@ func TestSystem_RunIssues(t *testing.T) {
 				c.api.Key = "secret"
 				u, _ := url.Parse("http://example.com")
 				c.SetAPIUrl(u)
-				c.Src = dst
+				c.SetSrc(dst)
 				return &c
 			}(),
 		},
 		{"unreadable src file",
 			func() *System {
 				var c System
-				c.Src = "2 apples, 3 oranges"
+				c.SetSrc("2 apples, 3 oranges")
 				c.Input = "count fruits"
 				c.api.Key = "secret"
 				c.api.URL, _ = url.Parse("http://localhost:12345") // no such host
@@ -87,7 +87,7 @@ func TestSystem_Run(t *testing.T) {
 		t.Error(err)
 	}
 
-	c.Src = "hallo warld"
+	c.SetSrc("hallo warld")
 	c.Input = "fix spelling"
 	if err := c.Run(); err != nil {
 		t.Error(err)
