@@ -22,41 +22,41 @@ type System struct {
 	Input      string
 }
 
-func (C *System) Run() error {
-	if len(C.Input) == 0 {
+func (s *System) Run() error {
+	if len(s.Input) == 0 {
 		return fmt.Errorf("missing input")
 	}
-	if err := C.loadkey(); err != nil {
+	if err := s.loadkey(); err != nil {
 		return err
 	}
-	if C.API.URL == nil {
+	if s.API.URL == nil {
 		return fmt.Errorf("Can.Run: missing API.URL")
 	}
 
 	// select action
 	var cmd Command
 	switch {
-	case C.Src != "":
+	case s.Src != "":
 		c := NewEdits()
-		if err := c.SetInput(C.Src); err != nil {
+		if err := c.SetInput(s.Src); err != nil {
 			return err
 		}
 		c.UpdateSrc = c.UpdateSrc
-		c.Instruction = C.Input
+		c.Instruction = s.Input
 		cmd = c
 
 	default:
 		c := NewChat()
-		c.Content = C.Input
-		c.SystemContent = C.SysContent
+		c.Content = s.Input
+		c.SystemContent = s.SysContent
 		cmd = c
 	}
 
 	// execute action
 	r := cmd.MakeRequest()
-	r.Header.Set("authorization", "Bearer "+C.API.Key)
-	r.URL.Host = C.API.URL.Host
-	r.URL.Scheme = C.API.URL.Scheme
+	r.Header.Set("authorization", "Bearer "+s.API.Key)
+	r.URL.Host = s.API.URL.Host
+	r.URL.Scheme = s.API.URL.Scheme
 
 	body, err := sendRequest(r)
 	if err != nil {
@@ -66,18 +66,18 @@ func (C *System) Run() error {
 	return cmd.HandleResponse(body)
 }
 
-func (C *System) loadkey() error {
-	if C.API.Key != "" {
+func (s *System) loadkey() error {
+	if s.API.Key != "" {
 		return nil
 	}
-	if C.API.KeyFile == "" {
+	if s.API.KeyFile == "" {
 		return nil
 	}
-	data, err := os.ReadFile(C.API.KeyFile)
+	data, err := os.ReadFile(s.API.KeyFile)
 	if err != nil {
 		return err
 	}
-	C.API.Key = string(bytes.TrimSpace(data))
+	s.API.Key = string(bytes.TrimSpace(data))
 	return nil
 }
 

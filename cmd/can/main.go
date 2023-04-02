@@ -14,17 +14,17 @@ func main() {
 	cli := cmdline.NewBasicParser()
 
 	// Skippy the magnificent
-	var c can.System
+	var s can.System
 
-	c.SysContent = cli.Option("--system-content, $CAN_SYSTEM_CONTENT").String("")
-	c.Src = cli.Option("-in", "path to file or block of text").String("")
-	c.API.KeyFile = cli.Option(
+	s.SysContent = cli.Option("--system-content, $CAN_SYSTEM_CONTENT").String("")
+	s.Src = cli.Option("-in", "path to file or block of text").String("")
+	s.API.KeyFile = cli.Option(
 		"--api-key-file, $OPENAI_API_KEY_FILE",
 	).String(
 		os.ExpandEnv("$HOME/.openai.key"),
 	)
-	c.API.Key = cli.Option("--api-key, $OPENAI_API_KEY").String("")
-	c.API.URL = cli.Option("--api-url, $OPENAI_API_URL").Url("https://api.openai.com")
+	s.API.Key = cli.Option("--api-key, $OPENAI_API_KEY").String("")
+	s.API.URL = cli.Option("--api-url, $OPENAI_API_URL").Url("https://api.openai.com")
 
 	can.SetDebug(cli.Flag("--debug"))
 
@@ -39,11 +39,11 @@ func main() {
 	)
 	cli.Parse()
 
-	c.Input = strings.Join(cli.Args(), " ")
+	s.Input = strings.Join(cli.Args(), " ")
 
 	log.SetFlags(0)
 
-	if err := c.Run(); err != nil {
+	if err := s.Run(); err != nil {
 		fatal(err)
 	}
 }
