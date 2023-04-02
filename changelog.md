@@ -5,6 +5,7 @@ be noted in this file
 
 ## [unreleased]
 
+- move command to cmd/can
 - add --api-url, defaults to https://api.openai.com
 
 ## [0.2.0] 2023-04-01
