@@ -1,0 +1,25 @@
+wordUsage: can [OPTIONS]
+
+Options
+    --system-content, $CAN_SYSTEM_CONTENT : ""
+    -in : ""
+        path to file or block of text
+
+    --api-key-file, $OPENAI_API_KEY_FILE : "/home/gregory/.openai.key"
+    --api-key, $OPENAI_API_KEY : ""
+    --debug
+    -h, --help
+
+Examples
+    Ask a question
+    $ can why is the number 42 significant?
+
+    Provide context
+    $ can correct spelling -in ./README.md
+    $ can correct spelling -in "hallo warld"
+    $ CAN_SYSTEM_CONTENT="You are a helpful assistant" can Who won the world series in 2020?
+
+2023/04/02 08:20:38 EOF
+2023/04/02 08:20:38 {}
+PASS
+ok  	github.com/gregoryv/can	0.004s
