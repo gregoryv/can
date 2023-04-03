@@ -143,11 +143,6 @@ func (s *System) loadkey() error {
 	return nil
 }
 
-type command interface {
-	MakeRequest() *http.Request
-	HandleResponse(io.Reader) error
-}
-
 // sendRequest sends the given request and returns the body. HTTP
 // status code >= 400 result in errors.
 func (s *System) sendRequest(r *http.Request) (body *bytes.Buffer, err error) {
@@ -179,6 +174,15 @@ func (s *System) readClose(in io.ReadCloser) *bytes.Buffer {
 	return &buf
 }
 
+// ----------------------------------------
+
+// command represents an API call with a parsing method
+type command interface {
+	MakeRequest() *http.Request
+	HandleResponse(io.Reader) error
+}
+
+
 func newChat() *chat {
 	return &chat{
 		Model:   "gpt-3.5-turbo",
@@ -195,6 +199,7 @@ type chat struct {
 	Out io.Writer
 }
 
+// MakeRequest returns a request for /v1/chat/completions
 func (c *chat) MakeRequest() *http.Request {
 	type m struct {
 		Role    string `json:"role"`
@@ -215,6 +220,8 @@ func (c *chat) MakeRequest() *http.Request {
 	return r
 }
 
+// HandleResponse writes the first choice, returns an error if there
+// are no choices.
 func (c *chat) HandleResponse(body io.Reader) error {
 	// parse result
 	var result struct {
@@ -237,6 +244,8 @@ func (c *chat) HandleResponse(body io.Reader) error {
 	return err
 }
 
+// ----------------------------------------
+
 func newEdits() *edits {
 	return &edits{
 		Model:       "text-davinci-edit-001",
@@ -245,6 +254,8 @@ func newEdits() *edits {
 }
 
 type edits struct {
+	// contains mixed public and private settings; maybe convert all to settings
+	
 	Model       string
 	input       string
 	Instruction string
@@ -260,7 +271,7 @@ type edits struct {
 	srcIsFile bool
 }
 
-// SetInput sets the input to v. If v is a file the content is of that
+// SetInput sets the input to v. If v is a file the content of that
 // file is used.
 func (c *edits) SetInput(v string) error {
 	if isFile(v) {
@@ -277,6 +288,7 @@ func (c *edits) SetInput(v string) error {
 	return nil
 }
 
+// MakeRequest returns a request for /v1/edits
 func (c *edits) MakeRequest() *http.Request {
 	input := map[string]any{
 		"model":       c.Model,
@@ -290,6 +302,8 @@ func (c *edits) MakeRequest() *http.Request {
 	return r
 }
 
+// HandleResponse writes the first choice, returns an error if there
+// are no choices.
 func (c *edits) HandleResponse(body io.Reader) error {
 	// parse result
 	var result struct {
