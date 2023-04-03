@@ -2,6 +2,8 @@ package can
 
 import (
 	"bytes"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -10,8 +12,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"fmt"
-	"io"
 )
 
 func TestSystem_RunIssues(t *testing.T) {
@@ -170,7 +170,6 @@ func Test_readClose(t *testing.T) {
 	}
 }
 
-
 func Test_chat(t *testing.T) {
 	c := newChat()
 
@@ -211,7 +210,6 @@ const validCompletionsResponse = `{
     "total_tokens": 21
   }
 }`
-
 
 func Test_edits_MakeRequest(t *testing.T) {
 	c := newEdits()
@@ -300,7 +298,6 @@ const validEditsResponse = `{
   }
 }
 `
-
 
 func Test_should(t *testing.T) {
 	if got := should([]byte("in"), io.EOF); string(got) != "in" {

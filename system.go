@@ -1,8 +1,16 @@
+/*
+Package can provides a system for interacting with api.openai.com/v1
+
+The main purpose of this system is to support a simple command line
+application (cmd/can). It is Not a generic client for api.openai.com
+
+*/
 package can
 
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,10 +18,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"errors"
 )
 
-// NewSystem returns a system with debug log is disabled.
+// NewSystem returns a system with debug log disabled.
 func NewSystem() *System {
 	return &System{
 		debug: log.New(ioutil.Discard, "can debug ", log.Flags()),
@@ -36,13 +43,32 @@ type System struct {
 	debug   *log.Logger
 }
 
-func (s *System) SetAPIUrl(v *url.URL)   { s.api.URL = v }
-func (s *System) SetAPIKey(v string)     { s.api.Key = v }
+// system settings
+
+// SetAPIUrl use scheme://hostname[:port], e.g. https://api.openai.com
+func (s *System) SetAPIUrl(v *url.URL) { s.api.URL = v }
+
+// SetAPIKey sets the bearer key used in API calls.
+func (s *System) SetAPIKey(v string) { s.api.Key = v }
+
+// SetAPIKeyFile sets the path to the file containing the API Key. If
+// SetAPIKey is used this has no effect.
 func (s *System) SetAPIKeyFile(v string) { s.api.KeyFile = v }
+
+// I dislike these settings; they are unclear
+
+// SetSysContent sets the system role content for /v1/chat/completions.
 func (s *System) SetSysContent(v string) { s.sysContent = v }
-func (s *System) SetUpdateSrc(v bool)    { s.updateSrc = v }
-func (s *System) SetSrc(v string)        { s.src = v }
-func (s *System) SetInput(v string)      { s.input = v }
+
+// SetSrc sets the path or text used for /v1/edits input.
+func (s *System) SetSrc(v string) { s.src = v }
+
+// SetUpdateSrc to control if result from /v1/edits should be written
+// back to the src file. Has no effect if the src is not a file.
+func (s *System) SetUpdateSrc(v bool) { s.updateSrc = v }
+
+// SetInput sets the question or instruction.
+func (s *System) SetInput(v string) { s.input = v }
 
 // SetDebugOutput writer, use nil to disable
 func (s *System) SetDebugOutput(v io.Writer) {
@@ -55,6 +81,9 @@ func (s *System) SetDebugOutput(v io.Writer) {
 	s.debug.SetOutput(v)
 }
 
+// Run builds and executes the request according to the system
+// settings. The idea is to call Run once. It is Not safe to call in
+// concurrent goroutines.
 func (s *System) Run() error {
 	if len(s.input) == 0 {
 		return fmt.Errorf("missing input")
@@ -119,8 +148,9 @@ type command interface {
 	HandleResponse(io.Reader) error
 }
 
+// sendRequest sends the given request and returns the body. HTTP
+// status code >= 400 result in errors.
 func (s *System) sendRequest(r *http.Request) (body *bytes.Buffer, err error) {
-	// send request
 	s.debug.Println(r.Method, r.URL)
 	resp, err := http.DefaultClient.Do(r)
 	if err != nil {
@@ -148,7 +178,6 @@ func (s *System) readClose(in io.ReadCloser) *bytes.Buffer {
 	}
 	return &buf
 }
-
 
 func newChat() *chat {
 	return &chat{
@@ -207,7 +236,6 @@ func (c *chat) HandleResponse(body io.Reader) error {
 	_, err := c.Out.Write([]byte(result.Choices[0].Message.Content))
 	return err
 }
-
 
 func newEdits() *edits {
 	return &edits{
@@ -290,7 +318,6 @@ func (c *edits) HandleResponse(body io.Reader) error {
 	_, err := c.Out.Write([]byte(result.Choices[0].Text))
 	return err
 }
-
 
 func isFile(src string) bool {
 	_, err := os.Stat(src)
