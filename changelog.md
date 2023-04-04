@@ -3,7 +3,7 @@
 This project adheres to semantic versioning and all major changes will
 be noted in this file
 
-## [unreleased]
+## [0.3.0] 2023-04-04
 
 - move command to cmd/can
 - add --api-url, defaults to https://api.openai.com
