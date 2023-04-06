@@ -94,6 +94,9 @@ func (s *System) Run() error {
 	if s.api.URL == nil {
 		return fmt.Errorf("Can.Run: missing API.URL")
 	}
+	if s.debug == nil {
+		s.debug = log.New(ioutil.Discard, "can debug ", log.Flags())
+	}
 
 	// select action
 	var cmd command
@@ -182,7 +185,6 @@ type command interface {
 	HandleResponse(io.Reader) error
 }
 
-
 func newChat() *chat {
 	return &chat{
 		Model:   "gpt-3.5-turbo",
@@ -255,7 +257,7 @@ func newEdits() *edits {
 
 type edits struct {
 	// contains mixed public and private settings; maybe convert all to settings
-	
+
 	Model       string
 	input       string
 	Instruction string

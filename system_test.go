@@ -83,7 +83,7 @@ func TestSystem_Run(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	s := NewSystem()
+	var s System
 	s.api.URL, _ = url.Parse(srv.URL)
 	s.api.Key = "secret"
 	s.SetSysContent("As a nice assistant.")
