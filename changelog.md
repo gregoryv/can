@@ -5,6 +5,8 @@ be noted in this file
 
 ## [unreleased]
 
+- Add option --in which writes results to given file, 
+  whereas -in (one dash) does not
 - Fix logging bug
 
 ## [0.3.0] 2023-04-04

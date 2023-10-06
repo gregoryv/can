@@ -3,7 +3,6 @@ Package can provides a system for interacting with api.openai.com/v1
 
 The main purpose of this system is to support a simple command line
 application (cmd/can). It is Not a generic client for api.openai.com
-
 */
 package can
 
@@ -33,7 +32,6 @@ type System struct {
 		KeyFile  string
 		Key      string
 	}
-
 	sysContent string
 	updateSrc  bool
 	src        string // ie. file or block of text
