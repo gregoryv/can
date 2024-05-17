@@ -282,20 +282,28 @@ func Test_edits_HandleResponse(t *testing.T) {
 }
 
 // from https://platform.openai.com/docs/api-reference/edits/create
-const validEditsResponse = `{
-  "object": "edit",
-  "created": 1589478378,
+const validEditsResponse = ` {
+  "id": "chatcmpl-9PlN3S0Ixni71oOUw7XRX8gyeQtDD",
+  "object": "chat.completion",
+  "created": 1715927321,
+  "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
-      "text": "word",
-      "index": 0
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "word"
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
     }
   ],
   "usage": {
-    "prompt_tokens": 25,
-    "completion_tokens": 32,
-    "total_tokens": 57
-  }
+    "prompt_tokens": 32,
+    "completion_tokens": 120,
+    "total_tokens": 152
+  },
+  "system_fingerprint": null
 }
 `
 
