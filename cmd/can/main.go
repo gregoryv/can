@@ -22,8 +22,7 @@ func main() {
 			"path to file or block of text",
 			"result is written on stdout",
 		).String("")
-		srcWrite = cli.Option("--in", "path to file, and write file").String("")
-		keyFile  = cli.Option(
+		keyFile = cli.Option(
 			"--api-key-file, $OPENAI_API_KEY_FILE",
 		).String(
 			os.ExpandEnv("$HOME/.openai.key"),
@@ -52,10 +51,8 @@ func main() {
 	s.SetAPIUrl(apiUrl)
 	s.SetSysContent(sysContent)
 	s.SetSrc(src)
-	if srcWrite != "" {
-		s.SetSrc(srcWrite)
-		s.SetUpdateSrc(true)
-	}
+	s.SetUpdateSrc(src != "")
+
 	s.SetInput(strings.Join(cli.Args(), " "))
 
 	log.SetFlags(0)

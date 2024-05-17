@@ -3,10 +3,9 @@
 This project adheres to semantic versioning and all major changes will
 be noted in this file
 
-## [unreleased]
+## [0.4.0] 2024-05-17
 
-- Add option --in which writes results to given file, 
-  whereas -in (one dash) does not
+- Fix use of deprecated /v1/edits API
 - Fix logging bug
 
 ## [0.3.0] 2023-04-04
