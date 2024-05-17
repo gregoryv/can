@@ -14,7 +14,7 @@ func main() {
 	cli := cmdline.NewBasicParser()
 
 	// Skippy the magnificent
-	var s can.System
+	s := can.NewSystem()
 
 	var (
 		sysContent = cli.Option("--system-content, $CAN_SYSTEM_CONTENT").String("")
